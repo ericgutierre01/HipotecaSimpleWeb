@@ -1,0 +1,51 @@
+.Container {
+    position: relative;
+    padding-top: 8rem;
+}
+
+.bg-gray {
+    background-color: rgb(243 244 246);
+    margin: -30px;
+    height: 100vh;
+}
+
+
+.PaddingDiv {
+    padding-left: 100px;
+    padding-right: 100px;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+.rounded {
+    border-radius: 30px;
+}
+
+
+@media(max-width: 991px) {
+    .bg-gray {
+        margin: -30px;
+    }
+
+    .PaddingDiv {
+        padding-left: 25px;
+        padding-right: 25px;
+        padding-top: 25px;
+        padding-bottom: 25px;
+    }
+
+}
+
+@media(max-width: 445px) {
+    .bg-gray {
+        margin: -30px;
+    }
+
+    .PaddingDiv {
+        padding-left: 25px;
+        padding-right: 25px;
+        padding-top: 25px;
+        padding-bottom: 25px;
+    }
+
+}

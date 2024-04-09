@@ -1,0 +1,149 @@
+<app-nav></app-nav>
+<div class="Container">
+    <div class="row mx-3 py-2">
+
+        <div class="d-flex justify-content-between">
+            <h3>Detalle del prestamo - {{prestamo.hipoBanco}}</h3>
+
+            <button type="submit"  (click)="pagorCuota()" class="btn btn-primary text-white" style="margin-bottom: 5px;">
+                <i class="fa-solid fa-money-bill"></i> Pagar Cuota
+            </button>
+        </div>
+        <hr>
+        <div class="row g-3">
+
+            <div class="d-flex justify-content-center" *ngIf="loading;">
+                <div class="spinner-border text-primary  m-5" role="status" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+              </div>
+
+            <div [hidden]="loading" >
+                <div class="row">
+                    <div class="col-md-1">
+                        <label class="form-label">Dia pago:</label>
+                        <input value="{{prestamo.hipoDiaPago}}" placeholder="0" disabled class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Desembolso:</label>
+                        <input value="RD{{prestamo.hipoMonto | currency}}" placeholder="Monto de la Hipoteca" disabled class="form-control">
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">Interes:</label>
+                        <input value="{{prestamo.hipoInteres}}%" placeholder="Interes" disabled class="form-control">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label">Plazo:</label>
+                        <input value="{{prestamo.hipoPlazo}} años" placeholder="0" disabled class="form-control">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Cuota:</label>
+                        <input value="RD{{prestamo.hipoCuota | currency}}" disabled class="form-control">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Seguros:</label>
+                        <input value="RD{{prestamo.hipoSeguros| currency}}" disabled class="form-control">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Cuota Total:</label>
+                        <input value="RD{{prestamo.hipoCuotaTotal | currency}}" disabled class="form-control">
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label">Fecha:</label>
+                        <input value="{{prestamo.hipoFecha | date: 'MMMM dd, yyyy'}}" disabled class="form-control">
+                    </div>
+
+                    <hr style="opacity: 0;">
+                    <hr>
+                    <div class="col-md-2">
+                        <label class="form-label">Total a pagar:</label>
+                        <input value="RD{{totalPagar | currency}}" disabled class="form-control">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Intereres:</label>
+                        <input value="RD{{interesesPagar | currency}}" disabled class="form-control">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Cuotas Restantes:</label>
+                        <input value="{{cuotasRestantes | number}}" disabled class="form-control">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Interes ahorrado: </label>
+                        <input value="RD{{interesAhorrado | currency}}" disabled class="form-control">      
+
+                    </div>
+
+                    <div *ngIf="tipo == 1" class="col-md-2">
+                        <label class="form-label">Tiempo ahorrado: </label>
+                        <input value="{{tiempoAhorrado}}" disabled class="form-control">      
+                    </div>
+                    <div *ngIf="tipo == 2" class="col-md-2">
+                        <label class="form-label">Nueva cuota: </label>
+                        <input value="{{newCuota | currency}}" disabled class="form-control">      
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Tipo: </label>
+                        <br>
+                        <select class="form-select" id="tipo_s" (change) = "generarTablaAmortizacion()">
+                            <option value="1"selected>Reducir tiempo</option>
+                            <option value="2">Reducir cuota</option>
+
+                          </select>
+
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <hr>
+
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Año</th>
+                                <th scope="col">Mes</th>
+                                <th style="text-align: right;" scope="col">Cuota</th>
+                                <th style="text-align: right;" scope="col">Interés</th>
+                                <th style="text-align: right;" scope="col">Capital</th>
+                                <th style="text-align: right;" scope="col">Saldo Pendiente</th>
+                                <th style="text-align: right;" scope="col">Pago Anticipado</th>
+                                <th style="text-align: center;" scope="col">Fecha</th>
+                                <th style="text-align: center;" scope="col">Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let cuota of tablaAnortizacion" [ngClass]="{'table-success': cuota.fecha != ''}">
+    
+                                <td>{{cuota.ano}}</td>
+                                <td>{{cuota.mes}}</td>
+                                <td style="text-align: right;">RD{{cuota.cuota| currency}}</td>
+                                <td style="text-align: right;">RD{{cuota.interes | currency}}</td>
+                                <td style="text-align: right;">RD{{cuota.capital | currency}}</td>
+                                <td style="text-align: right;">RD{{cuota.pendiente| currency}}</td>
+                                <td style="text-align: right;">RD{{cuota.anticipado| currency}}</td>
+                                <td style="text-align: center;">{{cuota.fecha | date}}</td>
+
+                                <th style="text-align: center;" scope="col"> <button (click)="borrarCuota(cuota.id)" *ngIf="cuota.fecha != ''" type="submit" class="btn btn-danger">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button></th>
+                            </tr>
+        
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

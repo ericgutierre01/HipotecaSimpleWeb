@@ -1,0 +1,76 @@
+<app-nav></app-nav>
+<div class="bg-gray">
+    <div class="Container">
+        <div class="row mx-3 py-2 PaddingDiv">
+
+            <h2>Agregar Hipoteca</h2>
+            <div class="row g-3 overflow-hidden rounded bg-white shadow">
+
+                <div class="d-flex justify-content-center" *ngIf="loading;">
+                    <div class="spinner-border text-primary  m-5" role="status" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+
+                <div [hidden]="loading" class="row p-4">
+
+                    <div class="col-md-3">
+                        <label for="montoHipo_ip" class="form-label">Monto de la hipoteca *</label>
+                        <input id="montoHipo_ip" placeholder="RD $0" type="text"
+                        mask="separator': {thousandSeparator: ',', suffix: ' sm'}" (blur)="calcularCuotaMensual()" class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Interés anual *</label>
+                        <input id="interes_ip" placeholder="0%" type="number" (blur)="calcularCuotaMensual()"
+                         class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="plazo_ip" class="form-label">Plazo en años *</label>
+                        <input id="plazo_ip" placeholder="0" type="number" class="form-control" (blur)="calcularCuotaMensual()">
+                    </div>
+
+
+                    <div class="col-md-3">
+                        <label for="montoSeguro_ip" class="form-label">Monto de los seguros *</label>
+                        <input id="montoSeguro_ip" placeholder="RD $0" type="text" (blur)="calcularCuotaMensual()"
+                            mask="separator': {thousandSeparator: ',', suffix: ','}" class="form-control">
+                    </div>
+
+                    <hr>
+                    <div class="col-md-3">
+                        <label for="banco_ip" class="form-label">Banco emisor</label>
+                        <input id="banco_ip" placeholder="Ej: Banco popular" type="text" class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="diaPago_ip" class="form-label">Dia de pagar</label>
+                        <input id="diaPago_ip" placeholder="01" type="text" class="form-control">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Cuota total: </label>
+                        <input id="cuotaTotal_ip" placeholder="RD 0" type="text" disabled class="form-control">
+                    </div>
+
+                    <div class="d-flex flex-row-reverse bd-highlight p-0 pt-4">
+
+                        <div class="p-2 bd-highlight"><button type="submit" (click)="Submit()"
+                                class="btn btn-primary btn-lg text-white ">
+                                Guardar
+
+                                <i class="fa fa-floppy-o"></i></button></div>
+
+                        <div class="p-2 bd-highlight">
+                            <button class="btn btn-danger btn-lg text-white" (click)="Cancelar()">
+                                <i class="fa fa-times"></i> Cancel</button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

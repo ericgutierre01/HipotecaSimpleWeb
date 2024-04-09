@@ -1,0 +1,54 @@
+<nav class="navbar bg-body-tertiary navbar-light bg-light shadow-sm p-3 mb-4 bg-white rounded fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand Icon" (click)="getUrl()">
+            <i class="{{bottonBack}}"></i>
+        </a>
+        <a style="color: #1b75bc;" class="navbar-brand">
+            Hipoteca Simple
+        </a>
+        <div class="punto">
+
+        </div>
+
+
+        <div class="nav-item dropdown nombreZone">
+            <img src=".../../../assets/hipotecaLogo.png" alt="" width="40" height="40">
+        </div>
+        <button hidden class="navbar-toggler" id="menu_btn" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="offcanvas offcanvas-start" tabindex="10" id="offcanvasNavbar"
+            aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Hola, {{cliNombre}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-flex flex-column justify-content-between">
+
+                <span></span>
+                <img class="align-text-center"  src=".../../../assets/hipotecaLogo.png" alt="" aria-disabled="true" style="opacity: 0.1;" width="100%" height="auto">
+                <span></span>
+                <!-- <ul class="navbar-nav  pe-3">
+                     <li class="nav-item">
+                        <a class="nav-link" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#/Zonas">Zonas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#/Clientes">Clientes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#/Prestamos">Prestamos</a>
+                    </li> 
+
+                </ul> -->
+
+                <div class="align-text-bottom" style="cursor: pointer; color: red; font-size: 25px;">
+                     <a class="nav-link" (click)="CerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</a>
+                </div>   
+            </div>
+        </div>
+    </div>
+</nav>
