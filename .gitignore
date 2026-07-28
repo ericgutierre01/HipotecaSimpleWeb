@@ -1,0 +1,40 @@
+# ============================================================
+#  SECRETOS — NO publicar (se quedan solo en tu máquina)
+# ============================================================
+# Cadena de conexión con credenciales de la base de datos
+Api/HipotecaSimple/appsettings.json
+# URL del servidor de la API
+Web/src/app/Api Url/url.ts
+
+# ============================================================
+#  Node / Angular (Web)
+# ============================================================
+node_modules/
+Web/node_modules/
+Web/dist/
+Web/tmp/
+Web/.angular/
+Web/.angular/cache/
+npm-debug.log*
+yarn-error.log*
+*.log
+
+# ============================================================
+#  .NET (Api)
+# ============================================================
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+
+# ============================================================
+#  Config local de herramientas (rutas absolutas, específicas de la máquina)
+# ============================================================
+.claude/
+
+# ============================================================
+#  Sistema operativo / editor
+# ============================================================
+.DS_Store
+Thumbs.db

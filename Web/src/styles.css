@@ -1,0 +1,86 @@
+/* ============================================================
+   Hipoteca Simple — estilos globales / base responsive (app-like)
+   ============================================================ */
+
+:root {
+  --hs-primary: #1b75bc;
+  --hs-bg: rgb(243 244 246);
+  --hs-radius: 18px;
+  /* Áreas seguras para notch / barra inferior en móviles */
+  --hs-safe-top: env(safe-area-inset-top, 0px);
+  --hs-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Evita el zoom automático de fuentes en rotación (iOS) */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--hs-bg);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* Nunca permitir scroll horizontal en toda la app */
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ninguna caja debe forzar scroll horizontal */
+img,
+table {
+  max-width: 100%;
+}
+
+/* ---- Touch targets cómodos (mínimo ~44px) en pantallas táctiles ---- */
+@media (hover: none) and (pointer: coarse) {
+  .btn,
+  .form-control,
+  .form-select,
+  .nav-link {
+    min-height: 44px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+}
+
+/* En móvil, los inputs con <16px provocan zoom automático en iOS */
+@media (max-width: 575.98px) {
+  .form-control,
+  .form-select {
+    font-size: 16px;
+  }
+}
+
+/* ---- Utilidades app-like reutilizables ---- */
+
+/* Superficie tipo tarjeta usada como contenedor de página */
+.hs-surface {
+  background-color: #fff;
+  border-radius: var(--hs-radius);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Botón que pasa a ancho completo en móvil (patrón de app) */
+@media (max-width: 575.98px) {
+  .hs-btn-block-sm {
+    width: 100%;
+  }
+}
+
+/* SweetAlert: que no se salga en pantallas pequeñas */
+.swal2-popup {
+  max-width: 92vw;
+}

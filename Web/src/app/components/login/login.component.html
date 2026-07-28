@@ -1,0 +1,34 @@
+<div class="Container">
+
+    <div class="row justify-content-center">
+        <div class="card col-xl-5 col-md-8 m-3">
+            <form name="loginform" class="card rounded-5 shadow-5-strong p-3 border-0 ">
+                <div class="col text-center p-2">
+                    <img src=".../../../assets/hipotecaLogo.png" alt="" width="150" height="150">
+                </div>
+                <h3 class="text-center">Bienvenidos a Hipoteca Simple</h3>
+                <p class="text-primary text-center mb-3"> Ingresa tus datos para iniciar sesión</p>
+                <!-- Email input -->
+                <div class="form-outline mb-2">
+                    <label class="form-label" for="form1Example1" [hidden]="true">Email </label>
+                    <input type="text" id="user" class="form-control" placeholder="&#xf007; Usuario"
+                        style="font-family:Arial, FontAwesome"  (keyup)="nextFocus($event, 'pass')"/>
+                </div>
+                <!-- Password input -->
+                <div class="form-outline mb-4">
+                    <label class="form-label" for="form1Example2" [hidden]="true">Contraseña</label>
+                    <input type="password" id="pass" class="form-control" placeholder="&#xf023; Contraseña"
+                        style="font-family:Arial, FontAwesome"  (keyup)="nextFocus($event, 'login')"/>
+                </div>
+                <div class="d-grid gap-2 col-8 mx-auto">
+                    <button type="submit" class="btn btn-primary lg text-white" type="button"
+                        (click)="login()"><strong>LOGIN </strong> <span *ngIf="loading"
+                            class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span></button>
+                </div>
+                <!-- Submit button -->
+                <hr class="text-white">
+            </form>
+        </div>
+    </div>
+
+</div>

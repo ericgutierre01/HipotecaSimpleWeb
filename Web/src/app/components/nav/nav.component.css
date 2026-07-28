@@ -1,0 +1,47 @@
+.example-spacer {
+  flex: 1 1 auto;
+}
+
+.container-fluid {
+  position: relative;
+  height: 2rem;
+}
+
+.Icon {
+  cursor: pointer;
+  color: #1b75bc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.25rem;
+}
+
+.Icon:hover {
+  transform: scale(1.20);
+  color: #1b75bc;
+
+}
+
+/* En móvil evitamos que el título de marca ocupe demasiado o se corte */
+@media (max-width: 575.98px) {
+  .navbar-brand {
+    font-size: 1rem;
+  }
+}
+.nombre {
+  display: block;
+}
+.punto {
+  display: none;
+}
+
+@media(max-width: 991px) {
+  .nombreZone {
+    display: none;
+  }
+  .punto {
+    display: block;
+  }
+}

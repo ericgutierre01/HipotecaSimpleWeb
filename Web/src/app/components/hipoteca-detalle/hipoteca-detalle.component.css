@@ -1,0 +1,214 @@
+.Container {
+  position: relative;
+  padding-top: 5rem;
+  padding-bottom: 2rem;
+}
+
+@media (max-width: 575.98px) {
+  .Container {
+    /* La navbar fija es más baja en móvil */
+    padding-top: 4.5rem;
+  }
+}
+
+/* Etiquetas y valores más legibles en el resumen */
+.form-label {
+  margin-bottom: 0.15rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* Celdas auxiliares (resumen compacto y badge) solo se usan en móvil */
+.amort-table .cuota-resumen,
+.amort-table .badge-actual {
+  display: none;
+}
+
+/* Resaltado de la cuota actual también en la tabla de escritorio */
+.amort-table tr.fila-actual > td {
+  background-color: #eaf3fb;
+}
+
+/* ============================================================
+   Tabla de amortización -> tarjetas apiladas en móvil
+   ============================================================ */
+@media (max-width: 767.98px) {
+
+  /* Ocultamos la cabecera: cada celda mostrará su propia etiqueta */
+  .amort-table thead {
+    display: none;
+  }
+
+  .amort-table,
+  .amort-table tbody,
+  .amort-table tr,
+  .amort-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .amort-table tr {
+    margin-bottom: 0.9rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    /* Padding generoso: crea el margen (gutter) alrededor del contenido/verde */
+    padding: 0.6rem 1rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+
+  /* Cuota pagada: toda la tarjeta se pinta de verde (sin fondo blanco detrás) */
+  .amort-table tr.table-success {
+    background: #d1e7dd;
+    border-color: #a3cfbb;
+  }
+
+  /* Anulamos el verde por celda de Bootstrap para que el color sea uniforme */
+  .amort-table tr.table-success td {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .amort-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    text-align: right !important;
+    /* Padding horizontal para que el texto no quede pegado al borde del verde */
+    padding: 0.6rem 0.7rem;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .amort-table tr td:last-child {
+    border-bottom: none;
+  }
+
+  /* Etiqueta a la izquierda tomada del atributo data-label */
+  .amort-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+    text-align: left;
+    margin-right: auto;
+  }
+
+  .amort-table td.amort-actions {
+    justify-content: flex-end;
+    padding-top: 0.6rem;
+  }
+
+  .amort-table td.amort-actions::before {
+    align-self: center;
+  }
+
+  /* ---- Cuota pagada COLAPSADA: solo una línea resumen, tocar para expandir ---- */
+  .amort-table tr.colapsada {
+    cursor: pointer;
+    padding: 0;
+  }
+
+  /* Al colapsar, ocultamos todas las celdas de detalle */
+  .amort-table tr.colapsada td:not(.cuota-resumen) {
+    display: none;
+  }
+
+  /* La línea resumen se muestra solo cuando la cuota está colapsada */
+  .amort-table tr.colapsada .cuota-resumen {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.4rem 0.75rem;
+    padding: 0.85rem 1rem;
+    border-bottom: none;
+    text-align: left !important;
+  }
+
+  /* Acento lateral para cuotas pagadas con pago extra/anticipado */
+  .amort-table tr.colapsada .cuota-resumen.con-extra {
+    box-shadow: inset 4px 0 0 0 #f59e0b;
+  }
+
+  /* Etiqueta "Extra" que identifica el pago anticipado */
+  .cuota-resumen .badge-extra {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: #f59e0b;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+    margin-left: 0.4rem;
+    white-space: nowrap;
+  }
+
+  .amort-table .cuota-resumen::before {
+    content: none;
+  }
+
+  .cuota-resumen .resumen-info {
+    font-weight: 600;
+    color: #14532d;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .cuota-resumen .resumen-monto {
+    font-weight: 600;
+    color: #14532d;
+    white-space: nowrap;
+  }
+
+  .cuota-resumen .resumen-monto-label {
+    font-weight: 600;
+    font-size: 0.7rem;
+    color: #6b7280;
+    margin-right: 0.15rem;
+  }
+
+  .cuota-resumen .resumen-monto .fa-chevron-down {
+    color: #6b7280;
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+  }
+
+  /* ---- Cuota actual: banner + tarjeta resaltada ---- */
+  .amort-table tr.fila-actual {
+    border: 2px solid #1b75bc;
+    box-shadow: 0 4px 14px rgba(27, 117, 188, 0.18);
+  }
+
+  .amort-table tr.fila-actual > td {
+    background-color: transparent;
+  }
+
+  .amort-table tr.fila-actual .badge-actual {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    background: #1b75bc;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .amort-table tr.fila-actual .badge-actual .badge-actual-btn {
+    font-weight: 700;
+    white-space: nowrap;
+    color: #1b75bc;
+  }
+
+  .amort-table .badge-actual::before {
+    content: none;
+  }
+}
