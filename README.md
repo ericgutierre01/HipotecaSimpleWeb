@@ -14,6 +14,37 @@
 
 ---
 
+## 📸 Capturas
+
+> Datos de una cuenta de demostración (préstamo inventado).
+
+<p align="center">
+  <img src="docs/capturas/landing.jpg" alt="Página de inicio con la calculadora de cuota" width="800">
+</p>
+<p align="center"><em>Página de presentación: calcula tu cuota sin crear cuenta.</em></p>
+
+<p align="center">
+  <img src="docs/capturas/grafica.jpg" alt="Gráfica de pagos año por año con abonos extra" width="800">
+</p>
+<p align="center"><em>Tu préstamo año por año: con cada abono desaparecen los últimos años.</em></p>
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/capturas/login.jpg" alt="Inicio de sesión" width="190"><br><sub>Inicio de sesión</sub></td>
+    <td align="center"><img src="docs/capturas/inicio.jpg" alt="Tus hipotecas" width="190"><br><sub>Tus hipotecas</sub></td>
+    <td align="center"><img src="docs/capturas/resumen.jpg" alt="Resumen del préstamo" width="190"><br><sub>Resumen y próxima cuota</sub></td>
+    <td align="center"><img src="docs/capturas/ahorro.jpg" alt="Ahorro y tasa de interés" width="190"><br><sub>Lo ahorrado y la tasa</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/capturas/cuotas.jpg" alt="Cuotas por año" width="190"><br><sub>Cuotas por año</sub></td>
+    <td align="center"><img src="docs/capturas/simular.jpg" alt="Simulador de abonos" width="190"><br><sub>Simulador de abonos</sub></td>
+    <td align="center"><img src="docs/capturas/crear.jpg" alt="Nueva hipoteca" width="190"><br><sub>Nueva hipoteca</sub></td>
+    <td></td>
+  </tr>
+</table>
+
+---
+
 ## ✨ Características
 
 - 🔐 **Login** con autenticación por token (Bearer).
