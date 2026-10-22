@@ -1,0 +1,47 @@
+<div class="hs-page">
+
+  <header class="hs-header">
+    <a routerLink="/" class="hs-icon-btn" aria-label="Volver a tus hipotecas"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></a>
+    <h1 class="hs-title hs-header__text">Notificaciones</h1>
+    <a routerLink="/Perfil" fragment="notificaciones" class="hs-icon-btn" aria-label="Configurar notificaciones">
+      <i class="fa-solid fa-gear" aria-hidden="true"></i>
+    </a>
+  </header>
+
+  <div class="hs-loading" *ngIf="loading" role="status">
+    <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i><span class="hs-sr-only">Cargando…</span>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <div class="noti__barra" *ngIf="items.length">
+      <span class="hs-eyebrow">{{ noLeidas ? noLeidas + ' sin leer' : 'Todo al día' }}</span>
+      <button type="button" class="link-btn" *ngIf="noLeidas" (click)="leerTodas()">Marcar todas como leídas</button>
+    </div>
+
+    <ul class="noti__lista" *ngIf="items.length">
+      <li *ngFor="let n of items">
+        <button type="button" class="noti" [class.noti--nueva]="!n.leida" (click)="abrir(n)">
+          <span class="noti__icono" [class.noti__icono--urgente]="urgente(n)">
+            <i class="fa-solid" [ngClass]="icono(n)" aria-hidden="true"></i>
+          </span>
+          <span class="noti__texto">
+            <span class="noti__fila">
+              <span class="noti__titulo">{{ n.titulo }}</span>
+              <span class="noti__cuando">{{ cuando(n.fecha) }}</span>
+            </span>
+            <span class="noti__cuerpo">{{ n.cuerpo }}</span>
+            <span class="noti__accion" *ngIf="n.url.includes('pagar=1')">Pagar ahora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+          </span>
+          <span class="noti__punto" *ngIf="!n.leida"><span class="hs-sr-only">Sin leer</span></span>
+        </button>
+      </li>
+    </ul>
+
+    <div class="noti__vacio" *ngIf="!items.length">
+      <span class="noti__vacio-icono"><i class="fa-regular fa-bell" aria-hidden="true"></i></span>
+      <h2 class="hs-h2">No tienes notificaciones</h2>
+      <p class="hs-text-muted">Aquí verás los recordatorios de pago: 5 días antes, un día antes y el día que vence tu cuota.</p>
+      <a routerLink="/Perfil" fragment="notificaciones" class="hs-btn hs-btn--ghost hs-btn--sm">Configurar avisos en el teléfono</a>
+    </div>
+  </ng-container>
+</div>

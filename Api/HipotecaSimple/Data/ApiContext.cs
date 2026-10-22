@@ -19,6 +19,11 @@ namespace HipotecaSimple.Data
         public DbSet<Usuarios> Usuarios { get; set; }
         public DbSet<Hipotecas> Hipotecas { get; set; }
         public DbSet<Pagos> Pagos { get; set; }
+        public DbSet<PushSuscripciones> PushSuscripciones { get; set; }
+        public DbSet<NotificacionesEnviadas> NotificacionesEnviadas { get; set; }
+        public DbSet<UsuarioTokens> UsuarioTokens { get; set; }
+        public DbSet<Notificaciones> Notificaciones { get; set; }
+        public DbSet<TasasHipoteca> TasasHipoteca { get; set; }
     }
 }
 

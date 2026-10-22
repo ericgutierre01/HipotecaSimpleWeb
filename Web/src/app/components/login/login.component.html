@@ -1,34 +1,42 @@
-<div class="Container">
-
-    <div class="row justify-content-center">
-        <div class="card col-xl-5 col-md-8 m-3">
-            <form name="loginform" class="card rounded-5 shadow-5-strong p-3 border-0 ">
-                <div class="col text-center p-2">
-                    <img src=".../../../assets/hipotecaLogo.png" alt="" width="150" height="150">
-                </div>
-                <h3 class="text-center">Bienvenidos a Hipoteca Simple</h3>
-                <p class="text-primary text-center mb-3"> Ingresa tus datos para iniciar sesión</p>
-                <!-- Email input -->
-                <div class="form-outline mb-2">
-                    <label class="form-label" for="form1Example1" [hidden]="true">Email </label>
-                    <input type="text" id="user" class="form-control" placeholder="&#xf007; Usuario"
-                        style="font-family:Arial, FontAwesome"  (keyup)="nextFocus($event, 'pass')"/>
-                </div>
-                <!-- Password input -->
-                <div class="form-outline mb-4">
-                    <label class="form-label" for="form1Example2" [hidden]="true">Contraseña</label>
-                    <input type="password" id="pass" class="form-control" placeholder="&#xf023; Contraseña"
-                        style="font-family:Arial, FontAwesome"  (keyup)="nextFocus($event, 'login')"/>
-                </div>
-                <div class="d-grid gap-2 col-8 mx-auto">
-                    <button type="submit" class="btn btn-primary lg text-white" type="button"
-                        (click)="login()"><strong>LOGIN </strong> <span *ngIf="loading"
-                            class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span></button>
-                </div>
-                <!-- Submit button -->
-                <hr class="text-white">
-            </form>
+<div class="login">
+    <div class="login__body">
+        <div class="login__brand">
+            <img class="login__logo" src="assets/logo.svg" alt="Hipoteca Simple" width="104" height="104">
+            <div>
+                <h1 class="login__title">Hipoteca Simple</h1>
+                <p class="login__lead">Mira cuánto debes, cuándo terminas y cuánto ahorras con cada abono.</p>
+            </div>
         </div>
-    </div>
 
+        <form name="loginform" class="login__form">
+            <div class="hs-field">
+                <label class="hs-label" for="user">Usuario</label>
+                <input type="text" id="user" class="hs-input" placeholder="Tu usuario" autocomplete="username"
+                    autocapitalize="none" (keyup)="nextFocus($event, 'pass')" />
+            </div>
+            <div class="hs-field">
+                <label class="hs-label" for="pass">Contraseña</label>
+                <div class="hs-input-group login__pass">
+                    <input [type]="verClave ? 'text' : 'password'" id="pass" placeholder="••••••••"
+                        autocomplete="current-password" (keyup)="nextFocus($event, 'login')" />
+                    <button type="button" class="login__eye" (click)="verClave = !verClave"
+                        [attr.aria-label]="verClave ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                        <i class="fa-regular" [class.fa-eye]="!verClave" [class.fa-eye-slash]="verClave" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="button" class="hs-btn hs-btn--block login__submit" [disabled]="loading" (click)="login()">
+                <ng-container *ngIf="!loading">Entrar <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></ng-container>
+                <ng-container *ngIf="loading"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i> Entrando…</ng-container>
+            </button>
+        </form>
+
+        <div class="login__links">
+            <a routerLink="/Recuperar">¿Olvidaste tu contraseña?</a>
+            <a routerLink="/Registro">Crear cuenta</a>
+            <a routerLink="/Bienvenido">¿Qué es Hipoteca Simple?</a>
+        </div>
+
+        <app-instalar></app-instalar>
+    </div>
 </div>

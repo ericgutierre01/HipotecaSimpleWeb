@@ -13,6 +13,7 @@ export class LoginComponent implements OnInit {
 
   loginViewModel = new LoginViewModel;
   loading = false;
+  verClave = false;
 
   constructor
     (
@@ -21,7 +22,7 @@ export class LoginComponent implements OnInit {
     ) { }
 
   ngOnInit(): void {
-    this.loading = true;
+    // Sin "loading" aquí: el botón solo debe decir "Entrando…" cuando el usuario toca Entrar
     this.restApi.chekIsLogin().subscribe(
       res => {
         this.loading = false;
@@ -73,11 +74,10 @@ export class LoginComponent implements OnInit {
         var fechaExpi = new Date();
         fechaExpi.setMinutes(fechaExpi.getMinutes() + 5);
         localStorage.setItem("fechaExp", fechaExpi.toString());
-        if(localStorage.getItem("lastUrl") != null){
-          this.router.navigateByUrl(localStorage.getItem("lastUrl")!);  
-        }else{
-           this.router.navigateByUrl('/');       
-        }
+        // Vuelve a la página que se quería abrir antes de pedir sesión (una sola vez); si no, al inicio
+        const destino = localStorage.getItem("lastUrl");
+        localStorage.removeItem("lastUrl");
+        this.router.navigateByUrl(destino && !/^\/(Login|Bienvenido|Registro)/.test(destino) ? destino : '/');
 
       }, err => {
         this.loading = false;

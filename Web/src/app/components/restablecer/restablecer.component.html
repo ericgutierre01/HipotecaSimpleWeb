@@ -1,0 +1,47 @@
+<div class="login">
+  <div class="login__body">
+
+    <div class="login__exito" *ngIf="!token">
+      <h1 class="login__title">Enlace no válido</h1>
+      <p class="login__lead">Abre el enlace completo que te llegó por correo, o pide uno nuevo.</p>
+      <a routerLink="/Recuperar" class="hs-btn hs-btn--block">Pedir un enlace nuevo</a>
+    </div>
+
+    <ng-container *ngIf="token && !listo">
+      <div class="login__brand">
+        <img class="login__logo" src="assets/logo.svg" alt="Hipoteca Simple" width="104" height="104">
+        <div>
+          <h1 class="login__title">Nueva contraseña</h1>
+          <p class="login__lead">Elige una contraseña de al menos 8 caracteres.</p>
+        </div>
+      </div>
+
+      <form class="login__form" (ngSubmit)="guardar()">
+        <div class="hs-field">
+          <label class="hs-label" for="res_pass">Nueva contraseña</label>
+          <div class="hs-input-group login__pass">
+            <input id="res_pass" name="password" [type]="verClave ? 'text' : 'password'" autocomplete="new-password" [(ngModel)]="password">
+            <button type="button" class="login__eye" (click)="verClave = !verClave" [attr.aria-label]="verClave ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <i class="fa-regular" [class.fa-eye]="!verClave" [class.fa-eye-slash]="verClave" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <div class="hs-field">
+          <label class="hs-label" for="res_confirmar">Repite la contraseña</label>
+          <input id="res_confirmar" name="confirmar" [type]="verClave ? 'text' : 'password'" class="hs-input" autocomplete="new-password" [(ngModel)]="confirmar">
+        </div>
+        <button type="submit" class="hs-btn hs-btn--block login__submit" [disabled]="loading">
+          {{ loading ? 'Guardando…' : 'Guardar contraseña' }}
+        </button>
+      </form>
+    </ng-container>
+
+    <div class="login__exito" *ngIf="listo">
+      <span class="login__exito-icono"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+      <h1 class="login__title">Contraseña actualizada</h1>
+      <p class="login__lead">Ya puedes entrar con tu nueva contraseña.</p>
+      <a routerLink="/Login" class="hs-btn hs-btn--block">Iniciar sesión</a>
+    </div>
+
+  </div>
+</div>

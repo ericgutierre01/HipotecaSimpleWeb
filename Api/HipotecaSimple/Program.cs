@@ -21,6 +21,12 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<ApiContext>(opcions => opcions.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnection")), ServiceLifetime.Transient);
 
+// Correos: recuperar contraseña y aprobación de registros
+builder.Services.AddSingleton<HipotecaSimple.Services.Correo>();
+
+// Recordatorios de pago por notificación push
+builder.Services.AddHostedService<HipotecaSimple.Services.RecordatoriosService>();
+
 
 var key = Encoding.ASCII.GetBytes("Rb2_R1hOETT3GJtkXmHHipotecaSimplesLD5NtIqVxpUjFz_i0x_gSPXrD");
 builder.Services.AddAuthentication().AddJwtBearer(x =>
@@ -41,6 +47,8 @@ builder.Services.AddAuthentication().AddJwtBearer(x =>
 
 var app = builder.Build();
 
+// En local imita el prefijo que IIS pone en producción, para que el Web use las mismas rutas
+if (app.Environment.IsDevelopment()) app.UsePathBase("/Fortune/HipotecaSimple");
 
 app.UseSwagger();
 if (app.Environment.IsDevelopment())
@@ -53,8 +61,9 @@ app.UseSwaggerUI(c => c.SwaggerEndpoint("/Fortune/HipotecaSimple/swagger/v1/swag
 //app.UseMiddleware<CustomMiddleware>();
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+// CORS antes de autorizar: así un 401 (sesión vencida) también lleva la cabecera y el navegador puede leerlo
 app.UseCors("AllowAllHeaders");
+app.UseAuthorization();
 app.MapControllers();
 
 

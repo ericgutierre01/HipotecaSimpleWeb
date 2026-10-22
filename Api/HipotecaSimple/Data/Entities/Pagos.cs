@@ -12,6 +12,8 @@ namespace HipotecaSimple.Data.Entities
         public decimal PagoMonto { get; set; }
         public decimal PagoMontoAnticipado { get; set; }
         public int PagoMesAnticipado { get; set; }
+        // Qué hace el abono a capital de este pago: false = reduce el plazo, true = reduce la cuota
+        public bool PagoReduceCuota { get; set; }
     }
 
 }

@@ -1,5 +1,7 @@
 ﻿using HipotecaSimple.Data;
 using HipotecaSimple.Data.Entities;
+using HipotecaSimple.Services;
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +34,8 @@ namespace HipotecaSimple.Controllers
                 if (model.HipoMonto < 1)
                     throw new Exception("El prestamo debe ser mayor a 0");
 
+                ValidarMesesFijos(model.HipoMesesFijos, model.HipoPlazo);
+                ValidarSeguroYRevision(model);
 
                 model.HipoCuota = calcularCuotaMensual(model.HipoMonto,model.HipoInteres, model.HipoPlazo);
                 model.HipoCuotaTotal = model.HipoCuota + model.HipoSeguros;
@@ -63,6 +67,7 @@ namespace HipotecaSimple.Controllers
 
 
                 _db.Pagos.RemoveRange(_db.Pagos.Where(x=>x.HipoId == hipoteca.HipoId));
+                _db.TasasHipoteca.RemoveRange(_db.TasasHipoteca.Where(x => x.HipoId == hipoteca.HipoId));
                 await _db.SaveChangesAsync();
 
                 _db.Hipotecas.Remove(hipoteca);
@@ -95,6 +100,12 @@ namespace HipotecaSimple.Controllers
                 hipoteca.HipoSeguros = model.HipoSeguros;
                 hipoteca.HipoBanco = model.HipoBanco;
                 hipoteca.HipoDiaPago = model.HipoDiaPago;
+                hipoteca.HipoAbonoLibre = model.HipoAbonoLibre;
+                ValidarMesesFijos(model.HipoMesesFijos, model.HipoPlazo);
+                ValidarSeguroYRevision(model);
+                hipoteca.HipoMesesFijos = model.HipoMesesFijos;
+                hipoteca.HipoMesesRevision = model.HipoMesesRevision;
+                hipoteca.HipoReduceCuota = model.HipoReduceCuota;
 
                 hipoteca.HipoCuota = calcularCuotaMensual(model.HipoMonto, model.HipoInteres, model.HipoPlazo);
                 hipoteca.HipoCuotaTotal = hipoteca.HipoCuota + model.HipoSeguros;
@@ -122,6 +133,7 @@ namespace HipotecaSimple.Controllers
 
 
                 hipoteca.Pagos = await _db.Pagos.Where(x => x.HipoId == hipoteca.HipoId).ToListAsync();
+                hipoteca.Tasas = await _db.TasasHipoteca.Where(x => x.HipoId == hipoteca.HipoId).OrderBy(x => x.TasaDesdeCuota).ToListAsync();
                 return Ok(hipoteca);
             }
             catch (Exception e)
@@ -156,23 +168,35 @@ namespace HipotecaSimple.Controllers
                     throw new Exception("Hipoteca no encontrada");
 
 
-                if (model.PagoMonto < hipoteca.HipoCuotaTotal)
-                    throw new Exception("NO se puede pagar menmos que la cuota mensual");
+                // La cuota del mes cambia con la tasa vigente y, si los abonos reducen la cuota, con cada abono
+                var pagos = await _db.Pagos.Where(x => x.HipoId == hipoteca.HipoId).ToListAsync();
+                var tasas = await _db.TasasHipoteca.Where(x => x.HipoId == hipoteca.HipoId).ToListAsync();
+                int mes = model.PagoMesAnticipado > 0 ? model.PagoMesAnticipado : (pagos.Count == 0 ? 1 : pagos.Max(p => p.PagoMesAnticipado) + 1);
+                var cuota = Amortizacion.CuotaDelMes(hipoteca, pagos.Where(p => p.PagoMesAnticipado < mes).ToList(), tasas, mes);
+                if (cuota == null)
+                    throw new Exception("Esa cuota no existe: el préstamo ya quedaría saldado");
+                var cuotaMes = Math.Round((decimal)cuota.Value + hipoteca.HipoSeguros, 2);
+
+                if (model.PagoMonto < cuotaMes - 0.01m)
+                    throw new Exception($"No se puede pagar menos que la cuota del mes (RD${cuotaMes.ToString("N2", CultureInfo.InvariantCulture)})");
 
 
-                var extra = model.PagoMonto - hipoteca.HipoCuotaTotal;
+                var extra = model.PagoMonto - cuotaMes;
+                if (extra < 0.01m) extra = 0;
 
                 model.PagoFecha = DateTime.Now;
+                model.PagoMontoAnticipado = extra;
+                if (extra == 0) model.PagoReduceCuota = false;
 
                 if(extra > 0)
                 {
-                    model.PagoMontoAnticipado = extra;
                     if(model.PagoMesAnticipado == 0 )
                         throw new Exception("Seleccione el mes");
 
-                    if(_db.Pagos.Any(x=>x.HipoId == model.HipoId && x.PagoMesAnticipado == model.PagoMesAnticipado))
-                        throw new Exception("Este mes ya fue pago");
-                } 
+                }
+
+                if (model.PagoMesAnticipado > 0 && pagos.Any(p => p.PagoMesAnticipado == model.PagoMesAnticipado))
+                    throw new Exception("Este mes ya fue pago");
 
                 _db.Pagos.Add(model);
                 await _db.SaveChangesAsync();
@@ -211,6 +235,74 @@ namespace HipotecaSimple.Controllers
 
         }
 
+
+        [HttpPost("Tasa")]
+        public async Task<ActionResult<TasasHipoteca>> PostTasa([FromBody] TasasHipoteca model)
+        {
+            try
+            {
+                var hipoteca = await _db.Hipotecas.SingleOrDefaultAsync(x => x.HipoId == model.HipoId && x.UsuId == UsuId);
+                if (hipoteca == null)
+                    throw new Exception("Hipoteca no encontrada");
+
+                // La cuota #1 siempre usa la tasa del contrato
+                if (model.TasaDesdeCuota < 2 || model.TasaDesdeCuota > hipoteca.HipoPlazo * 12)
+                    throw new Exception($"La cuota debe estar entre 2 y {hipoteca.HipoPlazo * 12}");
+                if (model.TasaValor <= 0 || model.TasaValor >= 100)
+                    throw new Exception("La tasa debe ser mayor a 0 y menor a 100");
+
+                // Un cambio por cuota: si ya había uno en esa cuota, se corrige
+                var tasa = await _db.TasasHipoteca.SingleOrDefaultAsync(x => x.HipoId == hipoteca.HipoId && x.TasaDesdeCuota == model.TasaDesdeCuota);
+                if (tasa == null)
+                {
+                    tasa = new TasasHipoteca { HipoId = hipoteca.HipoId, TasaDesdeCuota = model.TasaDesdeCuota };
+                    _db.TasasHipoteca.Add(tasa);
+                }
+                tasa.TasaValor = Math.Round(model.TasaValor, 4);
+                tasa.TasaFecha = DateTime.Now;
+                await _db.SaveChangesAsync();
+
+                return Ok(tasa);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.InnerException != null ? e.InnerException.Message : e.Message);
+            }
+        }
+
+        [HttpPost("Tasa/Delete")]
+        public async Task<ActionResult<string>> DeleteTasa(int id)
+        {
+            try
+            {
+                var tasa = await _db.TasasHipoteca.SingleOrDefaultAsync(x => x.TasaId == id);
+                if (tasa == null || !await _db.Hipotecas.AnyAsync(x => x.HipoId == tasa.HipoId && x.UsuId == UsuId))
+                    throw new Exception("Cambio de tasa no encontrado");
+
+                _db.TasasHipoteca.Remove(tasa);
+                await _db.SaveChangesAsync();
+
+                return Ok("Cambio de tasa borrado");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.InnerException != null ? e.InnerException.Message : e.Message);
+            }
+        }
+
+        static void ValidarSeguroYRevision(Hipotecas model)
+        {
+            if (model.HipoSeguros < 0)
+                throw new Exception("Los seguros no pueden ser negativos");
+            if (model.HipoMesesRevision != null && (model.HipoMesesRevision < 1 || model.HipoMesesRevision > 120))
+                throw new Exception("La revisión de tasa debe ser entre 1 y 120 meses");
+        }
+
+        static void ValidarMesesFijos(int? mesesFijos, int plazoAnios)
+        {
+            if (mesesFijos != null && (mesesFijos < 1 || mesesFijos > plazoAnios * 12))
+                throw new Exception("Los meses de tasa fija deben estar dentro del plazo");
+        }
 
         decimal calcularCuotaMensual(decimal montoPrestamo,decimal tasaInteresAnual, int plazoAnios)
         {

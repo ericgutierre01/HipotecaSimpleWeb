@@ -1,0 +1,39 @@
+<div class="login">
+  <div class="login__body">
+
+    <ng-container *ngIf="!mensaje; else listo">
+      <div class="login__brand">
+        <img class="login__logo" src="assets/logo.svg" alt="Hipoteca Simple" width="104" height="104">
+        <div>
+          <h1 class="login__title">Recuperar contraseña</h1>
+          <p class="login__lead">Escribe el correo de tu cuenta y te enviamos un enlace para crear una nueva.</p>
+        </div>
+      </div>
+
+      <form class="login__form" (ngSubmit)="enviar()">
+        <div class="hs-field">
+          <label class="hs-label" for="rec_email">Correo</label>
+          <input id="rec_email" name="email" type="email" inputmode="email" class="hs-input" autocomplete="email" autocapitalize="none" placeholder="tucorreo@ejemplo.com" [(ngModel)]="email">
+        </div>
+        <button type="submit" class="hs-btn hs-btn--block login__submit" [disabled]="loading">
+          <i class="fa-solid" [class.fa-paper-plane]="!loading" [class.fa-circle-notch]="loading" [class.fa-spin]="loading" aria-hidden="true"></i>
+          {{ loading ? 'Enviando…' : 'Enviar enlace' }}
+        </button>
+      </form>
+
+      <div class="login__links">
+        <a routerLink="/Login">Volver al inicio de sesión</a>
+      </div>
+    </ng-container>
+
+    <ng-template #listo>
+      <div class="login__exito">
+        <span class="login__exito-icono"><i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i></span>
+        <h1 class="login__title">Revisa tu correo</h1>
+        <p class="login__lead">{{ mensaje }} El enlace vence en 1 hora.</p>
+        <a routerLink="/Login" class="hs-btn hs-btn--block">Volver al inicio de sesión</a>
+      </div>
+    </ng-template>
+
+  </div>
+</div>

@@ -1,0 +1,60 @@
+/* Fila 1: logo · texto · cerrar. Fila 2 (solo Android): botón a todo el ancho */
+.instalar {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 12px;
+  background: var(--hs-surface);
+  border: 1px solid var(--hs-border);
+  border-radius: 20px;
+  padding: 12px 8px 12px 12px;
+  box-shadow: 0 6px 20px rgba(15, 27, 45, 0.06);
+}
+
+.instalar__logo {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 11px;
+}
+
+.instalar__texto {
+  min-width: 0;
+}
+
+.instalar__titulo {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.instalar__sub {
+  font-size: 13px;
+  color: var(--hs-muted);
+  line-height: 1.45;
+}
+
+.instalar__sub strong {
+  color: var(--hs-ink);
+}
+
+.instalar__btn {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-right: 4px;
+}
+
+.instalar__cerrar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  color: var(--hs-muted);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.instalar__cerrar:hover {
+  background: var(--hs-bg);
+}

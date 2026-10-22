@@ -1,0 +1,28 @@
+<section class="hs-card recordatorios" *ngIf="estado !== 'cargando' && estado !== 'no-soportado'" aria-label="Recordatorios de pago">
+  <div class="recordatorios__top">
+    <span class="recordatorios__icono" [class.recordatorios__icono--on]="estado === 'activo'">
+      <i class="fa-solid" [class.fa-bell]="estado !== 'bloqueado'" [class.fa-bell-slash]="estado === 'bloqueado'" aria-hidden="true"></i>
+    </span>
+    <div class="hs-header__text">
+      <h2 class="hs-h3">{{ estado === 'activo' ? 'Recordatorios activados' : 'Recordatorios de pago' }}</h2>
+      <p class="recordatorios__texto" *ngIf="estado === 'apagado' || estado === 'activo'">
+        Te avisamos 5 días antes, un día antes y el día que vence tu cuota.
+      </p>
+      <p class="recordatorios__texto" *ngIf="estado === 'instalar'">
+        En iPhone, primero instala la app (<strong>Compartir → Añadir a pantalla de inicio</strong>) y ábrela desde el ícono.
+      </p>
+      <p class="recordatorios__texto" *ngIf="estado === 'bloqueado'">
+        Bloqueaste las notificaciones. Permítelas para este sitio en los ajustes del navegador o del teléfono.
+      </p>
+    </div>
+  </div>
+
+  <button *ngIf="estado === 'apagado'" type="button" class="hs-btn hs-btn--block hs-btn--sm" [disabled]="ocupado" (click)="activar()">
+    <i class="fa-solid fa-bell" aria-hidden="true"></i> Activar recordatorios
+  </button>
+
+  <div class="recordatorios__acciones" *ngIf="estado === 'activo'">
+    <button type="button" class="hs-btn hs-btn--ghost hs-btn--sm" [disabled]="ocupado" (click)="probar()">Enviar prueba</button>
+    <button type="button" class="hs-btn hs-btn--danger-link hs-btn--sm" [disabled]="ocupado" (click)="desactivar()">Desactivar</button>
+  </div>
+</section>

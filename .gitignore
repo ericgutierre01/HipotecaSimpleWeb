@@ -3,8 +3,8 @@
 # ============================================================
 # Cadena de conexión con credenciales de la base de datos
 Api/HipotecaSimple/appsettings.json
-# URL del servidor de la API
-Web/src/app/Api Url/url.ts
+# Dirección del API (servidor + carpeta): cada entorno tiene la suya
+Web/src/config.json
 
 # ============================================================
 #  Node / Angular (Web)
@@ -38,3 +38,9 @@ yarn-error.log*
 # ============================================================
 .DS_Store
 Thumbs.db
+
+# Credenciales de cuentas de prueba locales
+*.local.txt
+
+# Paquete listo para subir al servidor (incluye credenciales)
+publicar/

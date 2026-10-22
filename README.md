@@ -43,10 +43,10 @@ HipotecaSimple/
 │       ├── Program.cs
 │       └── appsettings.example.json
 └── Web/                      → Frontend (Angular 16 + Bootstrap 5)
-    └── src/app/
-        ├── components/       → login, inicio, hipoteca-crear, hipoteca-detalle, nav
-        ├── services/         → data.service, guard de sesión
-        └── Api Url/url.example.ts
+    └── src/
+        ├── app/components/   → pantallas (bienvenida, login, inicio, hipoteca-crear, hipoteca-detalle…)
+        ├── app/services/     → data.service, guard de sesión, config (lee config.json)
+        └── config.example.json → plantilla de la dirección del API
 ```
 
 ---
@@ -81,13 +81,13 @@ Por seguridad, la URL del servidor y la cadena de conexión **no** están en el 
 # Backend: cadena de conexión a tu SQL Server
 cp "Api/HipotecaSimple/appsettings.example.json" "Api/HipotecaSimple/appsettings.json"
 
-# Frontend: URL de tu API
-cp "Web/src/app/Api Url/url.example.ts" "Web/src/app/Api Url/url.ts"
+# Frontend: dirección de tu API
+cp "Web/src/config.example.json" "Web/src/config.json"
 ```
 
 Luego edita:
 - `Api/HipotecaSimple/appsettings.json` → `ConnectionStrings.defaultConnection`
-- `Web/src/app/Api Url/url.ts` → `url` (ej. `http://localhost:5282/`)
+- `Web/src/config.json` → `servidor` (ej. `http://localhost:5282`) y `carpeta` donde vive el API (ej. `/Fortune/HipotecaSimple`; vacío si está en la raíz)
 
 > 💡 Estos dos archivos están en `.gitignore`, así que tus credenciales nunca se subirán.
 
@@ -107,11 +107,14 @@ npm start
 ```
 App en `http://localhost:4200`.
 
+### 5) Publicar la Web
+`npm run build` genera `Web/dist/`. El build **no incluye** `config.json`: la primera vez crea uno en el servidor, junto a `index.html` (copia `config.example.json` y pon tu dirección). Al publicar versiones nuevas ese archivo no se toca, y si cambias de servidor solo editas `config.json`: no hay que recompilar.
+
 ---
 
 ## 🔒 Seguridad
 
-- `appsettings.json` (credenciales de BD) y `url.ts` (URL del servidor) están **ignorados por git**; en el repo solo viven sus plantillas `*.example`.
+- `appsettings.json` (credenciales de BD) y `config.json` (dirección del API) están **ignorados por git**; en el repo solo viven sus plantillas `*.example`.
 - Nunca subas esos archivos reales ni los publiques en issues/capturas.
 
 ---

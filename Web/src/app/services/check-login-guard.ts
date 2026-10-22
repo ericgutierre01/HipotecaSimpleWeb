@@ -1,9 +1,10 @@
-import { Url } from 'src/app/Api Url/url';
+import { Config } from 'src/app/services/config';
 import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot, Router } from "@angular/router";
 import Swal from 'sweetalert2'
 import { inject } from '@angular/core';
 
 
+// lastUrl = página que el usuario quería abrir cuando se le pidió iniciar sesión; el login la usa una vez
 export const authGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot,
@@ -11,10 +12,18 @@ export const authGuard: CanActivateFn = (
 
   var router = inject(Router)
 
-  console.log("hola")
+  // Quien nunca ha iniciado sesión ve la presentación de la app, no un "Sesión vencida"
+  if (!localStorage.getItem("token")) {
+    // Si venía a una página concreta (p. ej. desde una notificación), al entrar lo llevamos ahí
+    if (state.url !== '/') localStorage.setItem("lastUrl", state.url);
+    else localStorage.removeItem("lastUrl");
+    router.navigateByUrl('/Bienvenido');
+    return false;
+  }
+
   try {
 
-    fetch(Url.url + 'Fortune/HipotecaSimple/Usuarios/IsLoging',
+    fetch(Config.api + 'Usuarios/IsLoging',
       {
         method: 'Get',
         headers:
@@ -25,8 +34,7 @@ export const authGuard: CanActivateFn = (
       })
       .then(async res => {
         if (res.status != 200) {
-          console.log("hola1")
-          localStorage.setItem("lastUrl", router.url);
+          localStorage.setItem("lastUrl", state.url);
           Swal.fire({
             position: 'top-end',
             icon: 'error',
@@ -38,13 +46,11 @@ export const authGuard: CanActivateFn = (
           return false;
         }
         else {
-          localStorage.setItem("lastUrl", router.url);
           return true;
         }
       })
       .catch(error => {
-        console.log("error")
-        localStorage.setItem("lastUrl", router.url);
+        localStorage.setItem("lastUrl", state.url);
 
         Swal.fire({
           position: 'top-end',

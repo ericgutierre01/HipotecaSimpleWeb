@@ -6,6 +6,7 @@ export class Pagos {
   pagoMonto: number;
   pagoMontoAnticipado: number;
   pagoMesAnticipado: number;
+  pagoReduceCuota: boolean; // el abono a capital reduce la cuota (false = reduce el plazo)
 
   constructor() {
     this.pagoId = 0;
@@ -14,6 +15,7 @@ export class Pagos {
     this.pagoMontoAnticipado = 0;
     this.pagoFecha = new Date();
     this.pagoMesAnticipado = 0;
+    this.pagoReduceCuota = false;
   }
 }
 

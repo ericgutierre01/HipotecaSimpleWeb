@@ -1,0 +1,73 @@
+<div class="hs-page">
+
+  <header class="hs-header">
+    <a routerLink="/" class="hs-icon-btn" aria-label="Volver a tus hipotecas"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></a>
+    <h1 class="hs-title hs-header__text">Mi perfil</h1>
+  </header>
+
+  <div class="hs-loading" *ngIf="loading" role="status">
+    <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i><span class="hs-sr-only">Cargando…</span>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <section class="perfil__cabecera">
+      <span class="perfil__avatar" aria-hidden="true">{{ iniciales }}</span>
+      <div class="hs-header__text">
+        <div class="perfil__nombre">{{ datos.nombre }}</div>
+        <div class="hs-eyebrow">Usuario: {{ usuario }}</div>
+      </div>
+    </section>
+
+    <div class="perfil__aviso" *ngIf="!datos.email">
+      <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+      Agrega tu correo: sin él no podrás recuperar tu contraseña.
+    </div>
+
+    <form class="hs-card perfil__seccion" (ngSubmit)="guardarDatos()" aria-label="Tus datos">
+      <h2 class="hs-h3">Tus datos</h2>
+      <div class="hs-field">
+        <label class="hs-label" for="perf_nombre">Nombre</label>
+        <input id="perf_nombre" name="nombre" class="hs-input" autocomplete="name" [(ngModel)]="datos.nombre">
+      </div>
+      <div class="hs-field">
+        <label class="hs-label" for="perf_email">Correo</label>
+        <input id="perf_email" name="email" type="email" inputmode="email" class="hs-input" autocomplete="email" autocapitalize="none" placeholder="tucorreo@ejemplo.com" [(ngModel)]="datos.email">
+        <p class="hs-help">Lo usamos para recuperar tu contraseña.</p>
+      </div>
+      <button type="submit" class="hs-btn hs-btn--block hs-btn--sm" [disabled]="guardando">Guardar cambios</button>
+    </form>
+
+    <section id="notificaciones" class="perfil__bloque" aria-label="Notificaciones">
+      <h2 class="hs-h2">Notificaciones</h2>
+      <p class="hs-help">Los recordatorios siempre quedan en la campana. Aquí activas que también lleguen a este teléfono.</p>
+      <app-recordatorios></app-recordatorios>
+      <a routerLink="/Notificaciones" class="hs-btn hs-btn--ghost hs-btn--sm">
+        <i class="fa-regular fa-bell" aria-hidden="true"></i> Ver mis notificaciones
+      </a>
+    </section>
+
+    <form class="hs-card perfil__seccion" (ngSubmit)="cambiarClave()" aria-label="Cambiar contraseña">
+      <h2 class="hs-h3">Cambiar contraseña</h2>
+      <div class="hs-field">
+        <label class="hs-label" for="perf_actual">Contraseña actual</label>
+        <input id="perf_actual" name="actual" [type]="verClave ? 'text' : 'password'" class="hs-input" autocomplete="current-password" [(ngModel)]="clave.actual">
+      </div>
+      <div class="hs-field">
+        <label class="hs-label" for="perf_nueva">Nueva contraseña</label>
+        <input id="perf_nueva" name="nueva" [type]="verClave ? 'text' : 'password'" class="hs-input" autocomplete="new-password" placeholder="Mínimo 8 caracteres" [(ngModel)]="clave.nueva">
+      </div>
+      <div class="hs-field">
+        <label class="hs-label" for="perf_confirmar">Repite la nueva contraseña</label>
+        <input id="perf_confirmar" name="confirmar" [type]="verClave ? 'text' : 'password'" class="hs-input" autocomplete="new-password" [(ngModel)]="clave.confirmar">
+      </div>
+      <label class="perfil__ver">
+        <input type="checkbox" name="ver" [(ngModel)]="verClave"> Mostrar contraseñas
+      </label>
+      <button type="submit" class="hs-btn hs-btn--ghost hs-btn--block hs-btn--sm" [disabled]="guardando">Cambiar contraseña</button>
+    </form>
+
+    <button type="button" class="hs-btn hs-btn--danger-link hs-btn--block" (click)="cerrarSesion()">
+      <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> Cerrar sesión
+    </button>
+  </ng-container>
+</div>

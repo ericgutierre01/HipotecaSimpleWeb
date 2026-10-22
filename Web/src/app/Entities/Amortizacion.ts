@@ -9,6 +9,10 @@ export class Amortizacion {
   anticipado: number;
   fecha: string;
   fechaVencimiento: Date;
+  abonoSimulado = 0;
+  tasa = 0; // % anual de esta cuota
+  pagado = 0; // monto registrado del pago (cuota + seguros + abono); 0 si no está pagada
+  reduceCuota = false; // el abono de esta cuota redujo la cuota (si no, el plazo)
   id:number;
 
   constructor() {

@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { DataService } from 'src/app/services/services/data.service';
 import { Hipoteca } from 'src/app/Entities/Hipoteca';
+import { calcularCuotaMensual } from 'src/app/services/amortizacion';
 import Swal from 'sweetalert2'
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 
 @Component({
@@ -10,128 +11,100 @@ import { Location } from '@angular/common';
   templateUrl: './hipoteca-crear.component.html',
   styleUrls: ['./hipoteca-crear.component.css']
 })
-export class HipotecaCrearComponent implements OnInit {
+export class HipotecaCrearComponent {
 
   loading = false;
-  hipoteca = new Hipoteca;
+  plazos = [10, 15, 20, 25, 30];
+  form = { banco: '', monto: '', tasa: '', plazo: 20 as number | null, seguros: '', dia: '', abonoLibre: false, mesesFijos: null as number | null, mesesRevision: 6 as number | null };
+  // Años de tasa fija más comunes; null = fija todo el plazo
+  aniosFijos = [1, 2, 3, 5];
 
   constructor(
     private _dataservice: DataService,
     private _router: Router,
-    private location: Location,
-    private _activeRoute: ActivatedRoute
+    private location: Location
   ) { }
 
-  ngOnInit(): void {
+  // ngx-mask devuelve el número sin separadores; vacío = 0
+  private num(v: any): number {
+    return Number(String(v ?? '').replace(/,/g, '')) || 0;
   }
 
+  get monto() { return this.num(this.form.monto); }
+  get tasa() { return this.num(this.form.tasa); }
+  get plazo() { return this.num(this.form.plazo); }
+  get seguros() { return this.num(this.form.seguros); }
+
+  get listo(): boolean {
+    return this.monto > 0 && this.tasa > 0 && this.plazo > 0;
+  }
+
+  get cuota(): number {
+    return this.listo ? calcularCuotaMensual(this.monto, this.tasa, this.plazo) : 0;
+  }
+
+  get totalPagar(): number {
+    return this.cuota * this.plazo * 12;
+  }
+
+  // El API registra la hipoteca con la fecha de hoy: la primera cuota vence este mes
+  get primeraCuota(): Date {
+    const hoy = new Date();
+    return new Date(hoy.getFullYear(), hoy.getMonth(), this.num(this.form.dia) || hoy.getDate());
+  }
+
+  get ultimaCuota(): Date {
+    const p = this.primeraCuota;
+    return new Date(p.getFullYear(), p.getMonth() + this.plazo * 12 - 1, p.getDate());
+  }
 
   Submit() {
-    try {
-      this.loading = true;
-
-      if ((<HTMLOptionElement>document.getElementById('montoHipo_ip')).value == "")
-        throw new TypeError("El monto es necesario");
-
-      if ((<HTMLOptionElement>document.getElementById('interes_ip')).value == "")
-        throw new TypeError("El interes es necesario");
-
-      if ((<HTMLOptionElement>document.getElementById('plazo_ip')).value == "")
-        throw new TypeError("El plazo es necesario");
-
-      this.hipoteca.hipoMonto = Number((<HTMLOptionElement>document.getElementById('montoHipo_ip')).value.replace(/ /g, '').replace(/,/g, ''));
-      this.hipoteca.hipoInteres = Number((<HTMLOptionElement>document.getElementById('interes_ip')).value.replace(/ /g, ''));
-      this.hipoteca.hipoPlazo = Number((<HTMLOptionElement>document.getElementById('plazo_ip')).value.replace(/ /g, ''));
-      this.hipoteca.hipoSeguros = Number((<HTMLOptionElement>document.getElementById('montoSeguro_ip')).value.replace(/ /g, '').replace(/,/g, ''));
-
-      this.hipoteca.hipoBanco = (<HTMLOptionElement>document.getElementById('banco_ip')).value;
-      this.hipoteca.hipoDiaPago = Number((<HTMLOptionElement>document.getElementById('diaPago_ip')).value);
-
-      this.loading = true;
-      this._dataservice.postHipoteca(this.hipoteca).subscribe(
-        res => {
-          Swal.fire({
-            position: 'top-end',
-            icon: 'success',
-            title: 'Hipoteca Agregada',
-            showConfirmButton: true,
-          }).then(() => {
-            try {
-              let prevUrl = document.referrer;
-              if (prevUrl.indexOf(window.location.host) !== -1)
-                this.location.back();
-              else
-                this._router.navigateByUrl('/');
-            } catch (error) {
-              this._router.navigateByUrl('/');
-            }
-
-          })
-        },
-
-        error => {
-          this.loading = false;
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: error.error,
-            timer: 1500
-          })
-          console.log(error)
-
-        }
-      )
-
-    } catch (TypeError) {
-      this.loading = false;
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: TypeError as string,
-        showConfirmButton: true,
-      });
-      console.log(TypeError);
+    const dia = this.num(this.form.dia);
+    const error =
+      !(this.monto > 0) ? 'Indica el monto del préstamo' :
+      !(this.tasa > 0) ? 'Indica la tasa de interés' :
+      !(this.plazo > 0) ? 'Indica el plazo en años' :
+      (dia < 0 || dia > 31) ? 'El día de pago debe estar entre 1 y 31' : '';
+    if (error) {
+      Swal.fire({ icon: 'warning', title: error, showConfirmButton: true });
+      return;
     }
+
+    const hipoteca = new Hipoteca();
+    hipoteca.hipoBanco = this.form.banco.trim();
+    hipoteca.hipoMonto = this.monto;
+    hipoteca.hipoInteres = this.tasa;
+    hipoteca.hipoPlazo = this.plazo;
+    hipoteca.hipoSeguros = this.seguros;
+    hipoteca.hipoDiaPago = dia;
+    hipoteca.hipoAbonoLibre = this.form.abonoLibre;
+    hipoteca.hipoMesesFijos = this.form.mesesFijos && this.form.mesesFijos < this.plazo * 12 ? this.form.mesesFijos : null;
+    hipoteca.hipoMesesRevision = hipoteca.hipoMesesFijos ? this.form.mesesRevision : null;
+
+    this.loading = true;
+    this._dataservice.postHipoteca(hipoteca).subscribe(
+      () => {
+        this.loading = false;
+        Swal.fire({
+          position: 'top-end',
+          icon: 'success',
+          title: 'Hipoteca agregada',
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => this._router.navigateByUrl('/'));
+      },
+      error => {
+        this.loading = false;
+        Swal.fire({ icon: 'error', title: 'Oops...', text: error.error, timer: 2500 });
+        console.log(error);
+      }
+    );
   }
 
   Cancelar() {
-    try {
-      let prevUrl = document.referrer;
-      if (prevUrl.indexOf(window.location.host) !== -1)
-        this.location.back();
-      else
-        this._router.navigateByUrl('/');
-    } catch (error) {
+    if (document.referrer.indexOf(window.location.host) !== -1)
+      this.location.back();
+    else
       this._router.navigateByUrl('/');
-    }
   }
-
-
-  calcularCuotaMensual() {
-
-    console.log("asdasda")
-    var monto =  Number((<HTMLOptionElement>document.getElementById('montoHipo_ip')).value.replace(/ /g, '').replace(/,/g, ''))
-    var tasa = Number((<HTMLOptionElement>document.getElementById('interes_ip')).value.replace(/ /g, ''))
-    var plazo = Number((<HTMLOptionElement>document.getElementById('plazo_ip')).value.replace(/ /g, ''))
-    var seguro = Number((<HTMLOptionElement>document.getElementById('montoSeguro_ip')).value.replace(/ /g, '').replace(/,/g, ''))
-    
-
-    if(monto > 0 && tasa > 0 && plazo > 0){
-        // Convertir la tasa de interés anual a mensual dividiéndola entre 12 y por 100 para pasarla a formato decimal
-      const tasaInteresMensual = (tasa / 12) / 100;
-      // Convertir el plazo de años a meses
-      const plazoMeses = plazo * 12;
-
-      // Calcular la cuota mensual
-      var cuota = (monto * tasaInteresMensual / (1 - Math.pow(1 + tasaInteresMensual, -plazoMeses))) + seguro;
-
-      var peso = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    });
-      (<HTMLOptionElement>document.getElementById('cuotaTotal_ip')).value =   "RD" +  peso.format(cuota); 
-    }
-
-  }
-
 }

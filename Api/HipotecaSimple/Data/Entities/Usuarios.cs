@@ -14,6 +14,7 @@ namespace HipotecaSimple.Data.Entities
         public string UsuPass { get; set; }
         public string UsuPermisos { get; set; }
         public DateTime UsuFechaCreacion { get; set; }
+        public string? UsuEmail { get; set; }
 
         [NotMapped]
         public string Token { get; set; }

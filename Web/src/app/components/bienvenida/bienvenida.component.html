@@ -1,0 +1,208 @@
+<div class="bv">
+
+  <header class="bv-top">
+    <a routerLink="/Bienvenido" class="bv-marca">
+      <img src="assets/logo.svg" alt="" width="36" height="36"> Hipoteca Simple
+    </a>
+    <nav class="bv-top__nav" aria-label="Tu cuenta">
+      <ng-container *ngIf="!conSesion; else enApp">
+        <a routerLink="/Login" class="bv-top__entrar">Entrar</a>
+        <a routerLink="/Registro" class="hs-btn hs-btn--sm">Crear cuenta</a>
+      </ng-container>
+      <ng-template #enApp><a routerLink="/" class="hs-btn hs-btn--sm"><span class="bv-top__largo">Ir a </span>Mis hipotecas</a></ng-template>
+    </nav>
+  </header>
+
+  <!-- ============ Portada: la calculadora ============ -->
+  <section class="bv-hero" aria-labelledby="bv-titulo">
+    <div class="bv-hero__texto">
+      <h1 id="bv-titulo">¿Cuándo terminas de pagar tu casa?</h1>
+      <p>Calcula tu cuota, mira cuánto se lleva el banco en intereses y cuántos años te quitas con cada abono. Después, lleva tu préstamo real aquí, pago a pago.</p>
+    </div>
+
+    <form class="bv-calc" aria-label="Calculadora de préstamo" (submit)="$event.preventDefault()">
+      <div class="hs-field">
+        <label class="hs-label" for="bv_monto">Monto del préstamo</label>
+        <div class="hs-input-group">
+          <span class="hs-input-group__affix">RD$</span>
+          <input id="bv_monto" name="monto" inputmode="decimal" mask="separator.2" thousandSeparator="," decimalMarker="."
+            [(ngModel)]="form.monto" (ngModelChange)="calcular()">
+        </div>
+      </div>
+
+      <div class="bv-calc__fila">
+        <div class="hs-field">
+          <label class="hs-label" for="bv_tasa">Tasa anual</label>
+          <div class="hs-input-group">
+            <input id="bv_tasa" name="tasa" type="number" inputmode="decimal" min="0" step="0.01" [(ngModel)]="form.tasa" (ngModelChange)="calcular()">
+            <span class="hs-input-group__affix">%</span>
+          </div>
+        </div>
+        <div class="hs-field">
+          <label class="hs-label" for="bv_seguros">Seguros al mes</label>
+          <div class="hs-input-group">
+            <span class="hs-input-group__affix">RD$</span>
+            <input id="bv_seguros" name="seguros" inputmode="decimal" placeholder="0" mask="separator.2" thousandSeparator="," decimalMarker="."
+              [(ngModel)]="form.seguros" (ngModelChange)="calcular()">
+          </div>
+        </div>
+      </div>
+
+      <fieldset class="bv-plazo">
+        <legend class="hs-label">Plazo en años</legend>
+        <div class="bv-plazo__opciones">
+          <button *ngFor="let p of plazos" type="button" class="bv-chip" [class.bv-chip--on]="form.plazo == p"
+            [attr.aria-pressed]="form.plazo == p" (click)="elegirPlazo(p)">{{ p }}</button>
+          <input name="plazo" type="number" inputmode="numeric" min="1" max="40" class="hs-input bv-plazo__otro" aria-label="Otro plazo en años"
+            [(ngModel)]="form.plazo" (ngModelChange)="calcular()">
+        </div>
+      </fieldset>
+
+      <div class="bv-calc__resultado" aria-live="polite">
+        <ng-container *ngIf="c; else incompleto">
+          <div class="bv-calc__label">Tu cuota mensual</div>
+          <div class="bv-calc__cuota">{{ c.cuotaTotal | currency }}</div>
+          <div class="bv-calc__detalle" *ngIf="c.cuotaTotal > c.cuota + 0.004">{{ c.cuota | currency }} de cuota + {{ c.cuotaTotal - c.cuota | currency }} de seguros</div>
+          <div class="bv-calc__split">
+            <span class="bv-calc__split-capital" [style.width.%]="100 - c.pctIntereses"></span>
+            <span class="bv-calc__split-interes" [style.width.%]="c.pctIntereses"></span>
+          </div>
+          <p class="bv-calc__lectura">
+            Le devuelves al banco <strong>{{ c.totalBanco | currency: 'DOP' : 'symbol' : '1.0-0' }}</strong>.
+            De eso, <strong class="bv-ambar">{{ c.intereses | currency: 'DOP' : 'symbol' : '1.0-0' }}</strong> son intereses
+            ({{ c.pctIntereses | number: '1.0-0' }}% de todo lo que pagas).
+          </p>
+        </ng-container>
+        <ng-template #incompleto><p class="bv-calc__lectura">Escribe el monto, la tasa y el plazo para ver tu cuota.</p></ng-template>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============ La gráfica: años que te quitas ============ -->
+  <section class="bv-sec bv-anos" *ngIf="c" aria-labelledby="bv-anos-titulo">
+    <div class="bv-sec__cabeza">
+      <h2 id="bv-anos-titulo">Tu préstamo, año por año</h2>
+      <p>Cada barra es lo que pagas en un año. Lo azul baja tu deuda, lo ámbar son intereses y lo verde son tus abonos.</p>
+    </div>
+
+    <div class="bv-controles">
+      <div class="bv-control">
+        <span class="hs-label" id="bv-abono-lbl">Abono extra cada diciembre</span>
+        <div class="bv-stepper" role="group" aria-labelledby="bv-abono-lbl">
+          <button type="button" class="bv-stepper__btn" aria-label="Una cuota menos" [disabled]="!abonoCuotas" (click)="cambiarAbono(-1)">−</button>
+          <div class="bv-stepper__valor" aria-live="polite">
+            <strong>{{ abonoCuotas ? abonoCuotas + (abonoCuotas === 1 ? ' cuota' : ' cuotas') : 'Ninguno' }}</strong>
+            <span *ngIf="abonoCuotas">{{ c.abonoMonto | currency: 'DOP' : 'symbol' : '1.0-0' }} al año</span>
+          </div>
+          <button type="button" class="bv-stepper__btn" aria-label="Una cuota más" [disabled]="abonoCuotas >= 6" (click)="cambiarAbono(1)">+</button>
+        </div>
+      </div>
+
+      <div class="bv-control" *ngIf="puedeSubirTasa">
+        <span class="hs-label" id="bv-tasa-lbl">Si a los 3 años sube la tasa</span>
+        <div class="hs-segment hs-segment--light hs-segment--dark" role="radiogroup" aria-labelledby="bv-tasa-lbl">
+          <button *ngFor="let s of subidas" type="button" role="radio" class="hs-segment__btn" [class.hs-segment__btn--active]="subeTasa === s"
+            [attr.aria-checked]="subeTasa === s" (click)="elegirSubida(s)">{{ s ? '+' + s + '%' : 'Igual' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bv-grafica" role="img" [attr.aria-label]="resumenGrafica">
+      <div class="bv-barra" *ngFor="let b of c.barras; let i = index" [class.bv-barra--fuera]="b.fuera">
+        <div class="bv-barra__pila" [style.height.%]="b.fuera ? b.capital + b.interes : 100">
+          <ng-container *ngIf="!b.fuera">
+            <span class="bv-barra__interes" [style.height.%]="b.interes"></span>
+            <span class="bv-barra__abono" [style.height.%]="b.abono"></span>
+            <span class="bv-barra__capital" [style.height.%]="b.capital"></span>
+          </ng-container>
+        </div>
+        <span class="bv-barra__ano" *ngIf="i % 5 === 0 || i === c.barras.length - 1">{{ b.ano }}</span>
+      </div>
+    </div>
+
+    <ul class="bv-leyenda">
+      <li><span class="bv-punto bv-punto--capital"></span>Capital</li>
+      <li><span class="bv-punto bv-punto--interes"></span>Intereses</li>
+      <li><span class="bv-punto bv-punto--abono"></span>Abonos</li>
+      <li><span class="bv-punto bv-punto--fuera"></span>Años que ya no pagas</li>
+    </ul>
+
+    <p class="bv-veredicto" aria-live="polite">
+      <ng-container *ngIf="!abonoCuotas && !subeTasa">Sin abonos terminas en <strong>{{ c.baseFin | date: 'MMMM y' }}</strong>. Suma un abono y mira qué pasa con los últimos años.</ng-container>
+      <ng-container *ngIf="abonoCuotas || subeTasa">
+        Terminas en <strong>{{ c.fin | date: 'MMMM y' }}</strong><ng-container *ngIf="c.mesesMenos > 0">, {{ formatearMeses(c.mesesMenos) }} antes,</ng-container>
+        y {{ c.difIntereses >= 0 ? 'te ahorras' : 'pagas de más' }} <strong [class.bv-verde]="c.difIntereses >= 0" [class.bv-rojo]="c.difIntereses < 0">{{ abs(c.difIntereses) | currency: 'DOP' : 'symbol' : '1.0-0' }}</strong> en intereses frente a pagar el contrato tal cual.
+      </ng-container>
+    </p>
+  </section>
+
+  <!-- ============ Enseñar: plazo o cuota ============ -->
+  <section class="bv-sec bv-dilema" *ngIf="c" aria-labelledby="bv-dilema-titulo">
+    <div class="bv-sec__cabeza">
+      <h2 id="bv-dilema-titulo">Cuando abonas, el banco te pregunta: ¿plazo o cuota?</h2>
+      <p>Con tu préstamo y un abono de una cuota cada diciembre, así quedaría cada opción:</p>
+    </div>
+    <div class="bv-dilema__opciones">
+      <article class="bv-opcion">
+        <h3>Reducir el plazo</h3>
+        <p>Sigues pagando {{ c.cuotaTotal | currency }} al mes y terminas en {{ c.plazo.fin | date: 'MMMM y' }}.</p>
+        <div class="bv-opcion__cifra">{{ c.plazo.ahorro | currency: 'DOP' : 'symbol' : '1.0-0' }}</div>
+        <div class="bv-opcion__pie">menos en intereses</div>
+      </article>
+      <article class="bv-opcion">
+        <h3>Reducir la cuota</h3>
+        <p>Terminas en la misma fecha y, tras el primer abono, tu cuota baja a {{ c.cuotaBaja.cuota | currency }}. Sigue bajando con cada abono.</p>
+        <div class="bv-opcion__cifra">{{ c.cuotaBaja.ahorro | currency: 'DOP' : 'symbol' : '1.0-0' }}</div>
+        <div class="bv-opcion__pie">menos en intereses</div>
+      </article>
+    </div>
+    <p class="bv-nota">Reducir el plazo casi siempre ahorra más; reducir la cuota te deja más dinero libre cada mes. En la app eliges en cada abono.</p>
+  </section>
+
+  <!-- ============ Qué hace la app ============ -->
+  <section class="bv-sec" aria-labelledby="bv-app-titulo">
+    <div class="bv-sec__cabeza">
+      <h2 id="bv-app-titulo">Lo que la app hace por ti</h2>
+    </div>
+    <ul class="bv-funciones">
+      <li>
+        <i class="fa-solid fa-scale-balanced" aria-hidden="true"></i>
+        <div><h3>Tu saldo real, al día</h3><p>Registras cada pago y ves cuánto debes, cuánto llevas en capital e intereses y en qué fecha terminas.</p></div>
+      </li>
+      <li>
+        <i class="fa-solid fa-coins" aria-hidden="true"></i>
+        <div><h3>Abonos que se notan</h3><p>Cada abono te muestra cuántos meses te quitas y cuánto interés dejas de pagar. Antes de hacerlo, pruébalo en el simulador.</p></div>
+      </li>
+      <li>
+        <i class="fa-solid fa-percent" aria-hidden="true"></i>
+        <div><h3>Tasa fija… y después</h3><p>Si tu tasa es fija los primeros años, te avisamos antes de cada revisión y recalculamos tu cuota con la tasa nueva.</p></div>
+      </li>
+      <li>
+        <i class="fa-solid fa-bell" aria-hidden="true"></i>
+        <div><h3>Recordatorios en tu teléfono</h3><p>Te avisamos antes de que venza cada cuota. Instálala en tu pantalla de inicio y úsala como una app.</p></div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ============ Cómo empezar (es una secuencia) ============ -->
+  <section class="bv-sec" aria-labelledby="bv-pasos-titulo">
+    <div class="bv-sec__cabeza">
+      <h2 id="bv-pasos-titulo">Empieza en tres pasos</h2>
+    </div>
+    <ol class="bv-pasos">
+      <li><h3>Crea tu cuenta</h3><p>Solo te pedimos un usuario, tu correo y una contraseña.</p></li>
+      <li><h3>Agrega tu préstamo</h3><p>Monto, tasa, plazo, seguros y día de pago: todo está en tu contrato.</p></li>
+      <li><h3>Registra cada pago</h3><p>La app hace las cuentas y te muestra cuánto te falta.</p></li>
+    </ol>
+  </section>
+
+  <section class="bv-final" aria-labelledby="bv-final-titulo">
+    <h2 id="bv-final-titulo">Lleva tu hipoteca sin hojas de cálculo</h2>
+    <div class="bv-final__acciones">
+      <a *ngIf="!conSesion" routerLink="/Registro" class="hs-btn">Crear cuenta</a>
+      <a *ngIf="!conSesion" routerLink="/Login" class="bv-final__entrar">Ya tengo cuenta</a>
+      <a *ngIf="conSesion" routerLink="/" class="hs-btn">Ir a mis hipotecas</a>
+    </div>
+    <p class="bv-final__nota">Hipoteca Simple te ayuda a organizarte. Los montos oficiales de tu préstamo son los que te da tu banco.</p>
+  </section>
+</div>

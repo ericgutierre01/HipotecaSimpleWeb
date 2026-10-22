@@ -1,176 +1,483 @@
-<app-nav></app-nav>
-<div class="Container">
-    <div class="px-2 px-sm-3 py-2">
+<div class="hs-page hs-page--wide">
 
-        <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center gap-2">
-            <h3 class="mb-0">Detalle del prestamo - {{prestamo.hipoBanco}}</h3>
+  <header class="hs-header">
+    <a routerLink="/" class="hs-icon-btn" aria-label="Volver a tus hipotecas"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></a>
+    <div class="hs-header__text">
+      <div class="hs-eyebrow">{{ real ? real.tasaActual + '% · ' + prestamo.hipoPlazo + ' años' : 'Cargando…' }}</div>
+      <h1 class="hs-title detalle__titulo">{{ real ? (prestamo.hipoBanco || 'Hipoteca') : 'Tu hipoteca' }}</h1>
+    </div>
+  </header>
 
-            <button type="submit"  (click)="pagorCuota()" class="btn btn-primary text-white hs-btn-block-sm">
-                <i class="fa-solid fa-money-bill"></i> Pagar Cuota
-            </button>
+  <div class="hs-segment detalle__tabs" role="tablist" aria-label="Secciones del préstamo">
+    <button type="button" role="tab" class="hs-segment__btn" [class.hs-segment__btn--active]="tab === 'resumen'" [attr.aria-selected]="tab === 'resumen'" (click)="irA('resumen')">Resumen</button>
+    <button type="button" role="tab" class="hs-segment__btn" [class.hs-segment__btn--active]="tab === 'cuotas'" [attr.aria-selected]="tab === 'cuotas'" (click)="irA('cuotas')">Cuotas</button>
+    <button type="button" role="tab" class="hs-segment__btn" [class.hs-segment__btn--active]="tab === 'simular'" [attr.aria-selected]="tab === 'simular'" (click)="irA('simular')">
+      Simular <span class="detalle__tab-badge" *ngIf="simulaciones.length">{{ simulaciones.length }}</span>
+    </button>
+  </div>
+
+  <div class="hs-loading" *ngIf="loading || !real" role="status">
+    <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i><span class="hs-sr-only">Cargando…</span>
+  </div>
+
+  <ng-container *ngIf="!loading && real">
+
+    <!-- ===================== RESUMEN ===================== -->
+    <div class="resumen" *ngIf="tab === 'resumen'" role="tabpanel" aria-label="Resumen">
+
+      <section class="hs-hero" aria-label="Saldo y progreso">
+        <div>
+          <div class="hs-hero__label">Saldo pendiente</div>
+          <div class="hs-hero__amount">{{ real.saldoActual | currency }}</div>
+          <div class="hs-hero__label">de {{ prestamo.hipoMonto | currency: 'DOP' : 'symbol' : '1.0-0' }} desembolsados</div>
         </div>
-        <hr>
-        <div class="row g-3">
+        <div class="progreso">
+          <div class="hs-progress hs-progress--on-navy"><div class="hs-progress__bar" [style.width.%]="real.progreso"></div></div>
+          <div class="progreso__texto">
+            <span>{{ real.cuotasPagadas }} de {{ real.filas.length }} cuotas</span>
+            <span>{{ real.progreso | number: '1.0-0' }}% completado</span>
+          </div>
+        </div>
+        <div class="hs-grid-2">
+          <div class="hs-hero__tile">
+            <div class="hs-hero__tile-label">Terminas de pagar</div>
+            <div class="hs-hero__tile-value">{{ real.fechaFin | date: 'MMMM y' }}</div>
+          </div>
+          <div class="hs-hero__tile">
+            <div class="hs-hero__tile-label">Te faltan</div>
+            <div class="hs-hero__tile-value">{{ formatearMeses(real.cuotasRestantes) }}</div>
+            <div class="hs-hero__tile-label">{{ real.cuotasRestantes }} cuotas</div>
+          </div>
+        </div>
+      </section>
 
-            <div class="d-flex justify-content-center" *ngIf="loading;">
-                <div class="spinner-border text-primary  m-5" role="status" role="status">
-                  <span class="sr-only">Loading...</span>
+      <section class="hs-card proxima" *ngIf="real.proxima as p; else saldado" aria-label="Próxima cuota">
+        <div class="proxima__top">
+          <div>
+            <div class="proxima__label">Próxima cuota · #{{ p.mes }}</div>
+            <div class="proxima__monto">{{ cuotaAPagar | currency }}</div>
+            <div class="hs-eyebrow">Vence el {{ p.fechaVencimiento | date: "d 'de' MMMM 'de' y" }}</div>
+          </div>
+          <span class="hs-pill" [class.hs-pill--warn]="!vencida" [class.hs-pill--late]="vencida">{{ textoVencimiento(p.fechaVencimiento) }}</span>
+        </div>
+
+        <div class="desglose" aria-hidden="true">
+          <span class="desglose__interes" [style.width.%]="desglose.interes"></span>
+          <span class="desglose__capital" [style.width.%]="desglose.capital"></span>
+          <span class="desglose__seguros" [style.width.%]="desglose.seguros"></span>
+        </div>
+        <ul class="leyenda">
+          <li><span class="leyenda__punto desglose__interes"></span><span class="leyenda__nombre">Interés</span><strong>{{ p.interes | currency }}</strong></li>
+          <li><span class="leyenda__punto desglose__capital"></span><span class="leyenda__nombre">Capital</span><strong>{{ p.capital | currency }}</strong></li>
+          <li><span class="leyenda__punto desglose__seguros"></span><span class="leyenda__nombre">Seguros</span><strong>{{ prestamo.hipoSeguros | currency }}</strong></li>
+        </ul>
+        <p class="proxima__tip">El <strong>{{ desglose.interesSinSeguros | number: '1.0-0' }}%</strong> de tu cuota (sin seguros) todavía se va en intereses. Cada abono extra baja directo el capital.</p>
+
+        <button type="button" class="hs-btn hs-btn--block" (click)="pagar()">
+          <i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i> Registrar pago
+        </button>
+      </section>
+      <ng-template #saldado>
+        <section class="hs-card saldado" aria-label="Préstamo saldado">
+          <span class="saldado__icono"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+          <h2 class="hs-h2">¡Préstamo saldado!</h2>
+          <p class="hs-text-muted">Ya no tienes cuotas pendientes.</p>
+        </section>
+      </ng-template>
+
+      <section class="ahorro" aria-label="Lo que has ahorrado">
+        <h2 class="hs-h2">Lo que has ahorrado</h2>
+        <div class="hs-grid-2">
+          <div class="ahorro__tile">
+            <i class="fa-solid fa-coins" aria-hidden="true"></i>
+            <div class="ahorro__label">Interés ahorrado</div>
+            <div class="ahorro__valor">{{ real.interesAhorrado | currency: 'DOP' : 'symbol' : '1.0-0' }}</div>
+          </div>
+          <div class="ahorro__tile" *ngIf="tipo == 1">
+            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+            <div class="ahorro__label">Tiempo ahorrado</div>
+            <div class="ahorro__valor">{{ formatearMeses(real.mesesAhorrados) }}</div>
+          </div>
+          <div class="ahorro__tile" *ngIf="tipo == 2">
+            <i class="fa-solid fa-arrow-trend-down" aria-hidden="true"></i>
+            <div class="ahorro__label">Tu cuota ahora</div>
+            <div class="ahorro__valor">{{ cuotaAPagar | currency }}</div>
+          </div>
+        </div>
+        <p class="hs-help" *ngIf="real.abonosReales">
+          Gracias a {{ real.abonosReales === 1 ? 'tu abono extra' : 'tus ' + real.abonosReales + ' abonos extra' }} de {{ real.totalAbonosReales | currency: 'DOP' : 'symbol' : '1.0-0' }}.
+        </p>
+        <p class="hs-help" *ngIf="!real.abonosReales">
+          Aún no has hecho abonos extra. <button type="button" class="link-btn" (click)="irA('simular')">Mira cuánto ahorrarías</button>
+        </p>
+      </section>
+
+      <section class="hs-card hs-rows" aria-label="Totales">
+        <div class="hs-row">
+          <span class="hs-row__label">Total del contrato</span>
+          <span class="hs-row__value" [class.tachado]="real.interesAhorrado > 1">{{ real.totalPagar | currency }}</span>
+        </div>
+        <div class="hs-row">
+          <strong>Total real a pagar</strong>
+          <span class="hs-row__value total-real">{{ real.totalPagar - real.interesAhorrado | currency }}</span>
+        </div>
+        <div class="hs-row">
+          <span class="hs-row__label">Intereses del contrato</span>
+          <span class="hs-row__value">{{ real.interesesPagar | currency }}</span>
+        </div>
+        <div class="hs-row">
+          <span class="hs-row__label">Ya pagaste en capital</span>
+          <span class="hs-row__value">{{ real.pagadoCapital | currency }}</span>
+        </div>
+        <div class="hs-row">
+          <span class="hs-row__label">Ya pagaste en intereses</span>
+          <span class="hs-row__value">{{ real.pagadoInteres | currency }}</span>
+        </div>
+      </section>
+
+      <section class="hs-card tasa" aria-label="Tasa de interés">
+        <div class="tasa__top">
+          <div>
+            <h2 class="hs-h3">Tasa de interés</h2>
+            <div class="tasa__valor">{{ real.tasaActual }}%</div>
+            <div class="hs-eyebrow" *ngIf="!primeraVariable">Fija todo el plazo</div>
+            <div class="hs-eyebrow" *ngIf="primeraVariable && !enPeriodoVariable">Fija hasta la cuota #{{ primeraVariable.mes - 1 }} · {{ vencimientoCuota(primeraVariable.mes - 1) | date: 'MMM y' }}</div>
+            <div class="hs-eyebrow" *ngIf="primeraVariable && enPeriodoVariable">Variable desde la cuota #{{ primeraVariable.mes }}</div>
+            <div class="hs-eyebrow" *ngIf="proximaRevision && proximaRevision.mes !== primeraVariable?.mes">Próxima revisión: cuota #{{ proximaRevision.mes }} · {{ proximaRevision.fechaVencimiento | date: 'MMM y' }}</div>
+          </div>
+          <button type="button" class="hs-btn hs-btn--ghost hs-btn--sm" (click)="registrarTasa()">Registrar cambio</button>
+        </div>
+
+        <div class="aviso tasa__aviso" *ngIf="revisionPendiente as r" role="status">
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+          <span *ngIf="diasParaRevision > 0 && esPrimeraRevision">Tu tasa fija termina pronto: desde la cuota #{{ r.mes }} ({{ r.fechaVencimiento | date: "d 'de' MMMM" }}) el banco puede cambiarla. Cuando te avise la nueva, regístrala.</span>
+          <span *ngIf="diasParaRevision > 0 && !esPrimeraRevision">Se acerca la revisión de tu tasa (cuota #{{ r.mes }}, {{ r.fechaVencimiento | date: "d 'de' MMMM" }}). Cuando el banco te avise, registra la nueva o la misma si no cambió.</span>
+          <span *ngIf="diasParaRevision <= 0">El banco revisó tu tasa en la cuota #{{ r.mes }}. Regístrala (o la misma si no cambió) para que tu cuota y tu saldo cuadren.</span>
+        </div>
+
+        <ul class="tasas" *ngIf="prestamo.tasas?.length">
+          <li class="tasas__item"><span>Desde la cuota #1</span><strong>{{ prestamo.hipoInteres }}%</strong></li>
+          <li class="tasas__item" *ngFor="let t of prestamo.tasas">
+            <span>Desde la cuota #{{ t.tasaDesdeCuota }} · {{ vencimientoCuota(t.tasaDesdeCuota) | date: 'MMM y' }}</span>
+            <strong>{{ t.tasaValor }}%</strong>
+            <button type="button" class="hs-icon-btn tasas__borrar" [attr.aria-label]="'Borrar la tasa desde la cuota ' + t.tasaDesdeCuota" (click)="borrarTasa(t)">
+              <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+            </button>
+          </li>
+        </ul>
+
+        <div class="hs-field">
+          <label class="hs-label" for="mesesFijos_ip">Tu tasa es fija por</label>
+          <select id="mesesFijos_ip" class="hs-input" [ngModel]="prestamo.hipoMesesFijos" (ngModelChange)="cambiarMesesFijos($event)">
+            <option [ngValue]="null">Todo el plazo</option>
+            <option *ngFor="let m of opcionesFijos" [ngValue]="m">{{ textoFijos(m) }}</option>
+          </select>
+          <p class="hs-help">Muchos bancos fijan la tasa los primeros años y luego la revisan. Te avisamos antes de que termine.</p>
+        </div>
+
+        <div class="hs-field" *ngIf="prestamo.hipoMesesFijos">
+          <label class="hs-label" for="mesesRevision_ip">Después, el banco la revisa</label>
+          <select id="mesesRevision_ip" class="hs-input" [ngModel]="prestamo.hipoMesesRevision" (ngModelChange)="cambiarMesesRevision($event)">
+            <option [ngValue]="null">Una sola vez</option>
+            <option [ngValue]="6">Cada 6 meses</option>
+            <option [ngValue]="12">Cada año</option>
+          </select>
+          <p class="hs-help">Te avisamos 30 días antes de cada revisión, igual que el banco.</p>
+        </div>
+      </section>
+
+      <section class="hs-card estrategia" aria-label="Estrategia de abonos">
+        <h2 class="hs-h3">¿Qué prefieres al abonar?</h2>
+        <div class="hs-segment hs-segment--light hs-segment--dark" role="radiogroup" aria-label="Estrategia">
+          <button type="button" role="radio" class="hs-segment__btn" [class.hs-segment__btn--active]="tipo == 1" [attr.aria-checked]="tipo == 1" (click)="cambiarTipo(1)">Reduce el plazo</button>
+          <button type="button" role="radio" class="hs-segment__btn" [class.hs-segment__btn--active]="tipo == 2" [attr.aria-checked]="tipo == 2" (click)="cambiarTipo(2)">Reduce la cuota</button>
+        </div>
+        <p class="hs-help" *ngIf="tipo == 1">Pagas lo mismo cada mes y terminas antes. Es la opción que más intereses ahorra.</p>
+        <p class="hs-help" *ngIf="tipo == 2">Terminas en la misma fecha, pero tu cuota baja después de cada abono.</p>
+        <p class="hs-help">Es lo que se marca por defecto: al registrar cada abono puedes elegir otra cosa, y los simulados usan esta.</p>
+
+        <h2 class="hs-h3 estrategia__sub">¿Cómo te deja abonar tu banco?</h2>
+        <div class="hs-segment hs-segment--light hs-segment--dark" role="radiogroup" aria-label="Tipo de abono">
+          <button type="button" role="radio" class="hs-segment__btn" [class.hs-segment__btn--active]="!prestamo.hipoAbonoLibre" [attr.aria-checked]="!prestamo.hipoAbonoLibre" (click)="cambiarAbono(false)">Cuotas completas</button>
+          <button type="button" role="radio" class="hs-segment__btn" [class.hs-segment__btn--active]="prestamo.hipoAbonoLibre" [attr.aria-checked]="prestamo.hipoAbonoLibre" (click)="cambiarAbono(true)">Cualquier monto</button>
+        </div>
+        <p class="hs-help" *ngIf="!prestamo.hipoAbonoLibre">Al pagar eliges cuántas cuotas de {{ cuotaAPagar | currency }}: la primera cubre el mes y las demás van a capital.</p>
+        <p class="hs-help" *ngIf="prestamo.hipoAbonoLibre">Al pagar escribes el monto: lo que pase de la cuota va a capital.</p>
+        <p class="hs-help">Los abonos a capital se hacen en sucursal: por internet el banco toma lo que sobra como cuota adelantada.</p>
+      </section>
+
+      <button type="button" class="teaser" (click)="irA('simular')">
+        <span class="teaser__icono"><i class="fa-solid fa-flask" aria-hidden="true"></i></span>
+        <span class="teaser__texto">
+          <span class="teaser__titulo">¿Y si abonas extra?</span>
+          <span class="teaser__sub">Simula abonos y mira cuándo terminarías, sin tocar tu préstamo.</span>
+        </span>
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+      </button>
+
+      <section class="hs-card datos" aria-label="Datos del préstamo">
+        <h2 class="hs-h3">Datos del préstamo</h2>
+        <dl class="datos__grid">
+          <div><dt>Desembolso</dt><dd>{{ prestamo.hipoMonto | currency }}</dd></div>
+          <div><dt>Tasa inicial</dt><dd>{{ prestamo.hipoInteres }}%</dd></div>
+          <div><dt>Plazo</dt><dd>{{ prestamo.hipoPlazo }} años · {{ prestamo.hipoPlazo * 12 }} cuotas</dd></div>
+          <div><dt>Día de pago</dt><dd>{{ prestamo.hipoDiaPago || '—' }} de cada mes</dd></div>
+          <div><dt>Cuota inicial sin seguros</dt><dd>{{ prestamo.hipoCuota | currency }}</dd></div>
+          <div><dt>Seguros</dt><dd>{{ prestamo.hipoSeguros | currency }} / mes <button type="button" class="link-btn" (click)="editarSeguros()" aria-label="Editar seguros">Editar</button></dd></div>
+          <div><dt>Inicio</dt><dd>{{ prestamo.hipoFecha | date: 'd MMM y' }}</dd></div>
+        </dl>
+        <button type="button" class="hs-btn hs-btn--danger-link hs-btn--sm" (click)="borrarHipoteca()">
+          <i class="fa-regular fa-trash-can" aria-hidden="true"></i> Eliminar hipoteca
+        </button>
+      </section>
+    </div>
+
+    <!-- ===================== CUOTAS ===================== -->
+    <div class="angosta cuotas" *ngIf="tab === 'cuotas'" role="tabpanel" aria-label="Cuotas">
+
+      <div class="aviso-sim" *ngIf="verSimuladas">
+        <span><i class="fa-solid fa-flask" aria-hidden="true"></i> Mostrando las cuotas con tus abonos de prueba.</span>
+        <button type="button" class="hs-btn hs-btn--ghost hs-btn--sm" (click)="verCuotasReales()">Ver reales</button>
+      </div>
+
+      <div class="stats3">
+        <div class="hs-card stats3__item"><div class="stats3__num stats3__num--ok">{{ tabla.cuotasPagadas }}</div><div class="hs-eyebrow">Pagadas</div></div>
+        <div class="hs-card stats3__item"><div class="stats3__num">{{ tabla.cuotasRestantes }}</div><div class="hs-eyebrow">Pendientes</div></div>
+        <div class="hs-card stats3__item"><div class="stats3__num stats3__num--extra">{{ tabla.abonosReales + (verSimuladas ? tabla.abonosSimulados : 0) }}</div><div class="hs-eyebrow">Con extra</div></div>
+      </div>
+
+      <div class="filtros" role="group" aria-label="Filtrar cuotas">
+        <button type="button" class="filtro" [class.filtro--on]="filtro === 'todas'" [attr.aria-pressed]="filtro === 'todas'" (click)="cambiarFiltro('todas')">Todas</button>
+        <button type="button" class="filtro" [class.filtro--on]="filtro === 'pendientes'" [attr.aria-pressed]="filtro === 'pendientes'" (click)="cambiarFiltro('pendientes')">Pendientes</button>
+        <button type="button" class="filtro" [class.filtro--on]="filtro === 'pagadas'" [attr.aria-pressed]="filtro === 'pagadas'" (click)="cambiarFiltro('pagadas')">Pagadas</button>
+        <button type="button" class="filtro" [class.filtro--on]="filtro === 'extra'" [attr.aria-pressed]="filtro === 'extra'" (click)="cambiarFiltro('extra')">Con extra</button>
+      </div>
+
+      <p class="hs-text-muted vacio-filtro" *ngIf="!grupos.length">No hay cuotas con este filtro.</p>
+
+      <section class="hs-card grupo" *ngFor="let g of grupos" [attr.aria-label]="'Año ' + g.ano">
+        <button type="button" class="grupo__cabecera" [attr.aria-expanded]="abiertos.has(g.ano)" (click)="toggleGrupo(g.ano)">
+          <span class="grupo__texto">
+            <span class="grupo__titulo">Año {{ g.ano }} · {{ g.desde | date: 'MMM y' }} – {{ g.hasta | date: 'MMM y' }}</span>
+            <span class="grupo__sub">{{ g.pagadas }} de {{ g.total }} pagadas<span class="grupo__extra" *ngIf="g.extras"> · {{ g.extras }} con extra</span></span>
+          </span>
+          <i class="fa-solid" [class.fa-chevron-up]="abiertos.has(g.ano)" [class.fa-chevron-down]="!abiertos.has(g.ano)" aria-hidden="true"></i>
+        </button>
+
+        <ol class="linea" *ngIf="abiertos.has(g.ano)">
+          <li *ngFor="let f of g.filas" class="linea__item"
+            [class.linea__item--pagada]="esPagada(f)" [class.linea__item--actual]="f.mes === tabla.cuotaActualMes">
+            <span class="linea__punto" aria-hidden="true"><i class="fa-solid fa-check" *ngIf="esPagada(f)"></i></span>
+
+            <div class="actual" *ngIf="f.mes === tabla.cuotaActualMes; else fila">
+              <div class="actual__top">
+                <div>
+                  <div class="actual__label">CUOTA ACTUAL</div>
+                  <div class="actual__titulo">#{{ f.mes }} · {{ f.fechaVencimiento | date: 'd MMM y' }}</div>
+                </div>
+                <span class="hs-pill" [class.hs-pill--warn]="!vencida" [class.hs-pill--late]="vencida">{{ textoVencimiento(f.fechaVencimiento) }}</span>
+              </div>
+              <dl class="actual__grid">
+                <div><dt>Cuota</dt><dd class="actual__fuerte">{{ f.cuota + prestamo.hipoSeguros | number: '1.2-2' }}</dd></div>
+                <div><dt>Saldo después</dt><dd class="actual__fuerte">{{ saldoDespues(f) | number: '1.2-2' }}</dd></div>
+                <div><dt>Interés</dt><dd>{{ f.interes | number: '1.2-2' }}</dd></div>
+                <div><dt>Capital</dt><dd>{{ f.capital | number: '1.2-2' }}</dd></div>
+                <div><dt>Tasa</dt><dd>{{ f.tasa }}%</dd></div>
+                <div *ngIf="f.abonoSimulado"><dt>Abono de prueba</dt><dd class="txt-extra">{{ f.abonoSimulado | number: '1.2-2' }}</dd></div>
+              </dl>
+              <button type="button" class="hs-btn hs-btn--sm hs-btn--block" *ngIf="!verSimuladas" (click)="pagar()">Registrar pago</button>
+            </div>
+
+            <ng-template #fila>
+              <div class="fila-wrap">
+                <button type="button" class="fila" [attr.aria-expanded]="expandidas.has(f.mes)" (click)="toggleFila(f.mes)">
+                  <span class="fila__info">
+                    <span class="fila__titulo">#{{ f.mes }} · {{ f.fechaVencimiento | date: 'd MMM y' }}</span>
+                    <span class="fila__sub fila__sub--ok" *ngIf="esPagada(f)">Pagada el {{ f.fecha | date: 'd MMM' }}</span>
+                    <span class="fila__sub" *ngIf="!esPagada(f)">Interés {{ f.interes | number: '1.2-2' }}</span>
+                    <span class="fila__chips" *ngIf="cambiaTasa(f)">
+                      <span class="hs-pill hs-pill--warn"><i class="fa-solid fa-percent" aria-hidden="true"></i> Tasa {{ f.tasa }}% desde aquí</span>
+                    </span>
+                    <span class="fila__chips" *ngIf="f.anticipado">
+                      <span class="hs-pill hs-pill--extra" *ngIf="f.anticipado - f.abonoSimulado > 0">
+                        <i class="fa-solid fa-coins" aria-hidden="true"></i> Extra {{ f.anticipado - f.abonoSimulado | currency: 'DOP' : 'symbol' : '1.0-0' }}<ng-container *ngIf="f.reduceCuota"> · bajó la cuota</ng-container>
+                      </span>
+                      <span class="hs-pill hs-pill--extra" *ngIf="f.abonoSimulado">
+                        <i class="fa-solid fa-flask" aria-hidden="true"></i> Prueba {{ f.abonoSimulado | currency: 'DOP' : 'symbol' : '1.0-0' }}
+                      </span>
+                    </span>
+                  </span>
+                  <span class="fila__saldo"><span>Saldo</span><strong>{{ saldoDespues(f) | number: '1.2-2' }}</strong></span>
+                </button>
+                <div class="fila__detalle" *ngIf="expandidas.has(f.mes)">
+                  <dl class="actual__grid">
+                    <div class="fila__total"><dt>{{ esPagada(f) ? 'Total pagado' : 'Total a pagar' }}</dt><dd>{{ totalDe(f) | number: '1.2-2' }}</dd></div>
+                    <div><dt>Interés</dt><dd>{{ f.interes | number: '1.2-2' }}</dd></div>
+                    <div><dt>Capital</dt><dd>{{ f.capital | number: '1.2-2' }}</dd></div>
+                    <div><dt>Seguros</dt><dd>{{ segurosDe(f) | number: '1.2-2' }}</dd></div>
+                    <div><dt>Abono extra</dt><dd>{{ f.anticipado | number: '1.2-2' }}</dd></div>
+                    <div><dt>Cuota sin seguros</dt><dd>{{ f.cuota | number: '1.2-2' }}</dd></div>
+                    <div><dt>Tasa</dt><dd>{{ f.tasa }}%</dd></div>
+                  </dl>
+                  <button type="button" class="hs-btn hs-btn--danger-link hs-btn--sm" *ngIf="esPagada(f) && !verSimuladas" (click)="borrarCuota(f.id)">
+                    <i class="fa-regular fa-trash-can" aria-hidden="true"></i> Borrar este pago
+                  </button>
                 </div>
               </div>
+            </ng-template>
+          </li>
+        </ol>
+      </section>
+    </div>
 
-            <div [hidden]="loading" >
-                <div class="row g-3">
-                    <div class="col-6 col-md-1">
-                        <label class="form-label">Dia pago:</label>
-                        <input value="{{prestamo.hipoDiaPago}}" placeholder="0" disabled class="form-control">
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <label class="form-label">Desembolso:</label>
-                        <input value="RD{{prestamo.hipoMonto | currency}}" placeholder="Monto de la Hipoteca" disabled class="form-control">
-                    </div>
-                    <div class="col-6 col-md-1">
-                        <label class="form-label">Interes:</label>
-                        <input value="{{prestamo.hipoInteres}}%" placeholder="Interes" disabled class="form-control">
-                    </div>
+    <!-- ===================== SIMULAR ===================== -->
+    <div class="angosta simular" *ngIf="tab === 'simular'" role="tabpanel" aria-label="Simular">
 
-                    <div class="col-6 col-md-1">
-                        <label class="form-label">Plazo:</label>
-                        <input value="{{prestamo.hipoPlazo}} años" placeholder="0" disabled class="form-control">
-                    </div>
+      <div class="aviso">
+        <i class="fa-solid fa-flask" aria-hidden="true"></i>
+        Es una prueba: nada de esto cambia tu préstamo real.
+      </div>
 
-                    <div class="col-6 col-md-2">
-                        <label class="form-label">Cuota:</label>
-                        <input value="RD{{prestamo.hipoCuota | currency}}" disabled class="form-control">
-                    </div>
-
-                    <div class="col-6 col-md-2">
-                        <label class="form-label">Seguros:</label>
-                        <input value="RD{{prestamo.hipoSeguros| currency}}" disabled class="form-control">
-                    </div>
-
-                    <div class="col-6 col-md-2">
-                        <label class="form-label">Cuota Total:</label>
-                        <input value="RD{{prestamo.hipoCuotaTotal | currency}}" disabled class="form-control">
-                    </div>
-
-                    <div class="col-6 col-md-1">
-                        <label class="form-label">Fecha:</label>
-                        <input value="{{prestamo.hipoFecha | date: 'MMMM dd, yyyy'}}" disabled class="form-control">
-                    </div>
-
-                    <hr style="opacity: 0;">
-                    <hr>
-                    <div class="col-6 col-md-2">
-                        <label class="form-label">Total a pagar:</label>
-                        <input value="RD{{totalPagar | currency}}" disabled class="form-control">
-                    </div>
-
-                    <div class="col-6 col-md-2">
-                        <label class="form-label">Intereres:</label>
-                        <input value="RD{{interesesPagar | currency}}" disabled class="form-control">
-                    </div>
-
-                    <div class="col-6 col-md-2">
-                        <label class="form-label">Cuotas Restantes:</label>
-                        <input value="{{cuotasRestantes | number}}" disabled class="form-control">
-                    </div>
-
-                    <div class="col-6 col-md-2">
-                        <label class="form-label">Interes ahorrado: </label>
-                        <input value="RD{{interesAhorrado | currency}}" disabled class="form-control">
-
-                    </div>
-
-                    <div *ngIf="tipo == 1" class="col-6 col-md-2">
-                        <label class="form-label">Tiempo ahorrado: </label>
-                        <input value="{{tiempoAhorrado}}" disabled class="form-control">
-                    </div>
-                    <div *ngIf="tipo == 2" class="col-6 col-md-2">
-                        <label class="form-label">Nueva cuota: </label>
-                        <input value="{{newCuota | currency}}" disabled class="form-control">
-                    </div>
-
-                    <div class="col-6 col-md-2">
-                        <label class="form-label">Tipo: </label>
-                        <select class="form-select" id="tipo_s" (change) = "generarTablaAmortizacion()">
-                            <option value="1"selected>Reducir tiempo</option>
-                            <option value="2">Reducir cuota</option>
-
-                          </select>
-
-                    </div>
-
-                </div>
-
-                <div>
-
-                    <hr>
-
-                    <!-- Tabla de amortización: scroll horizontal en pantallas medianas,
-                         y se transforma en tarjetas apiladas en móvil (ver CSS .amort-table) -->
-                    <div class="table-responsive">
-                        <table class="table table-striped amort-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Año</th>
-                                    <th scope="col">Mes</th>
-                                    <th style="text-align: right;" scope="col">Cuota</th>
-                                    <th style="text-align: right;" scope="col">Interés</th>
-                                    <th style="text-align: right;" scope="col">Capital</th>
-                                    <th style="text-align: right;" scope="col">Saldo Pendiente</th>
-                                    <th style="text-align: right;" scope="col">Pago Anticipado</th>
-                                    <th style="text-align: center;" scope="col">Vence</th>
-                                    <th style="text-align: center;" scope="col">Pagado</th>
-                                    <th style="text-align: center;" scope="col">Opciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let cuota of tablaAnortizacion"
-                                    [attr.id]="esCuotaActual(cuota) ? 'cuota-actual' : null"
-                                    [ngClass]="{'table-success': esPagada(cuota), 'colapsada': esColapsada(cuota), 'fila-actual': esCuotaActual(cuota)}"
-                                    (click)="toggleCuota(cuota)">
-
-                                    <!-- Resumen compacto: solo visible en móvil cuando la cuota pagada está colapsada -->
-                                    <td class="cuota-resumen" [class.con-extra]="cuota.anticipado > 0" data-label="">
-                                        <span class="resumen-info">
-                                            <i class="fa-solid fa-circle-check"></i> #{{cuota.mes}} · {{cuota.fechaVencimiento | date: 'dd MMM yyyy'}}
-                                            <span *ngIf="cuota.anticipado > 0" class="badge-extra"><i class="fa-solid fa-coins"></i> Extra</span>
-                                        </span>
-                                        <span class="resumen-monto"><span class="resumen-monto-label">Saldo</span> RD{{cuota.pendiente | currency}} <i class="fa-solid fa-chevron-down"></i></span>
-                                    </td>
-
-                                    <!-- Etiqueta de la cuota actual (solo móvil) -->
-                                    <td *ngIf="esCuotaActual(cuota)" class="badge-actual" data-label="">
-                                        <span class="badge-actual-txt"><i class="fa-solid fa-star"></i> Cuota actual</span>
-                                        <button type="button" class="btn btn-light btn-sm badge-actual-btn" (click)="pagorCuota(); $event.stopPropagation()">
-                                            <i class="fa-solid fa-money-bill"></i> Pagar
-                                        </button>
-                                    </td>
-
-                                    <td data-label="Año">{{cuota.ano}}</td>
-                                    <td data-label="Mes">{{cuota.mes}}</td>
-                                    <td data-label="Cuota" style="text-align: right;">RD{{cuota.cuota| currency}}</td>
-                                    <td data-label="Interés" style="text-align: right;">RD{{cuota.interes | currency}}</td>
-                                    <td data-label="Capital" style="text-align: right;">RD{{cuota.capital | currency}}</td>
-                                    <td data-label="Saldo Pendiente" style="text-align: right;">RD{{cuota.pendiente| currency}}</td>
-                                    <td data-label="Pago Anticipado" style="text-align: right;">RD{{cuota.anticipado| currency}}</td>
-                                    <td data-label="Vence" style="text-align: center;">{{cuota.fechaVencimiento | date: 'dd MMM yyyy'}}</td>
-                                    <td data-label="Pagado" style="text-align: center;">{{cuota.fecha | date}}</td>
-
-                                    <td data-label="Opciones" class="amort-actions" style="text-align: center;">
-                                        <button (click)="borrarCuota(cuota.id); $event.stopPropagation()" *ngIf="esPagada(cuota)" type="submit" class="btn btn-danger btn-sm">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </div>
+      <section class="hs-hero" *ngIf="sim; else sinSim" aria-label="Resultado de la simulación" aria-live="polite">
+        <div>
+          <div class="hs-hero__label">Con tu simulación terminas en</div>
+          <div class="hs-hero__amount">{{ sim.fechaFin | date: 'MMMM y' }}</div>
+        </div>
+        <div class="hs-grid-2">
+          <div class="hs-hero__tile" *ngIf="tipo == 1">
+            <div class="hs-hero__tile-label">{{ mesesAntes ? 'Terminas antes' : 'Terminas' }}</div>
+            <div class="hs-hero__tile-value" [class.txt-bueno]="mesesAntes">{{ mesesAntes ? formatearMeses(mesesAntes) : 'Igual' }}</div>
+            <div class="hs-hero__tile-label">que hoy</div>
+          </div>
+          <div class="hs-hero__tile" *ngIf="tipo == 2">
+            <div class="hs-hero__tile-label">Tu cuota quedaría en</div>
+            <div class="hs-hero__tile-value txt-bueno">{{ sim.nuevaCuota + prestamo.hipoSeguros | currency: 'DOP' : 'symbol' : '1.0-0' }}</div>
+          </div>
+          <div class="hs-hero__tile">
+            <div class="hs-hero__tile-label">{{ diferenciaIntereses >= 0 ? 'Intereses extra ahorrados' : 'Pagarías de más en intereses' }}</div>
+            <div class="hs-hero__tile-value" [class.txt-bueno]="diferenciaIntereses >= 0" [class.txt-malo]="diferenciaIntereses < 0">{{ abs(diferenciaIntereses) | currency: 'DOP' : 'symbol' : '1.0-0' }}</div>
+          </div>
         </div>
 
+        <div class="barras" role="img"
+          [attr.aria-label]="'Duración: contrato hasta ' + (fechaFinContrato | date: 'MMMM y') + ', hoy hasta ' + (real.fechaFin | date: 'MMMM y') + ', simulado hasta ' + (sim.fechaFin | date: 'MMMM y')">
+          <div class="barra">
+            <div class="barra__texto"><span>Contrato</span><span>{{ fechaFinContrato | date: 'MMM y' }}</span></div>
+            <div class="hs-progress hs-progress--on-navy"><div class="hs-progress__bar barra--contrato" style="width: 100%"></div></div>
+          </div>
+          <div class="barra">
+            <div class="barra__texto"><span>Hoy</span><span>{{ real.fechaFin | date: 'MMM y' }}</span></div>
+            <div class="hs-progress hs-progress--on-navy"><div class="hs-progress__bar" [style.width.%]="real.filas.length / (prestamo.hipoPlazo * 12) * 100"></div></div>
+          </div>
+          <div class="barra barra--fuerte">
+            <div class="barra__texto"><span>Simulado</span><span>{{ sim.fechaFin | date: 'MMM y' }}</span></div>
+            <div class="hs-progress hs-progress--on-navy"><div class="hs-progress__bar barra--sim" [style.width.%]="sim.filas.length / (prestamo.hipoPlazo * 12) * 100"></div></div>
+          </div>
+        </div>
+      </section>
+      <ng-template #sinSim>
+        <section class="hs-card sin-sim">
+          <h2 class="hs-h3">¿Cuánto te ahorrarías?</h2>
+          <p class="hs-text-muted">Agrega un abono o un cambio de tasa abajo y mira al instante cuándo terminarías de pagar y cuánto interés pagarías.</p>
+        </section>
+      </ng-template>
+
+      <section class="hs-card comparacion" *ngIf="sim" aria-label="Comparación">
+        <div class="comparacion__fila comparacion__cabecera"><span></span><span>Hoy</span><span class="txt-extra">Simulado</span></div>
+        <div class="comparacion__fila"><span>Cuotas restantes</span><span>{{ real.cuotasRestantes }}</span><strong>{{ sim.cuotasRestantes }}</strong></div>
+        <div class="comparacion__fila"><span>Interés ahorrado</span><span>{{ real.interesAhorrado | number: '1.0-0' }}</span><strong>{{ sim.interesAhorrado | number: '1.0-0' }}</strong></div>
+        <div class="comparacion__fila"><span>Total real a pagar</span><span>{{ real.totalPagar - real.interesAhorrado | number: '1.0-0' }}</span><strong>{{ sim.totalPagar - sim.interesAhorrado | number: '1.0-0' }}</strong></div>
+      </section>
+
+      <section class="abonos" *ngIf="simulaciones.length" aria-label="Tu simulación">
+        <h2 class="hs-h2">Tu simulación</h2>
+        <div class="abono" *ngFor="let s of simulaciones; let i = index">
+          <span class="abono__icono"><i class="fa-solid" [class.fa-repeat]="s.tipo !== 'tasa'" [class.fa-percent]="s.tipo === 'tasa'" aria-hidden="true"></i></span>
+          <div class="hs-header__text">
+            <div class="abono__titulo">{{ describirSimulacion(s) }}</div>
+            <div class="hs-eyebrow" *ngIf="s.tipo === 'tasa'">{{ cuotaSimulada(s) != null ? 'Tu cuota pasaría a ' + (cuotaSimulada(s) | currency) : 'El préstamo ya estaría saldado' }}</div>
+            <div class="hs-eyebrow" *ngIf="s.tipo !== 'tasa'">{{ s.monto | currency }} × {{ vecesSimulacion(s) }} {{ vecesSimulacion(s) === 1 ? 'abono' : 'abonos' }} = {{ s.monto * vecesSimulacion(s) | currency }}</div>
+          </div>
+          <button type="button" class="hs-icon-btn abono__quitar" [attr.aria-label]="'Quitar: ' + describirSimulacion(s)" (click)="quitarSimulacion(i)">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
+      </section>
+
+      <section class="hs-card nuevo-abono" aria-label="Agregar abono">
+        <h2 class="hs-h3">{{ simulaciones.length ? 'Agregar otro abono' : 'Agregar un abono' }}</h2>
+
+        <div class="hs-segment hs-segment--light hs-segment--dark" role="radiogroup" aria-label="Frecuencia">
+          <button type="button" role="radio" class="hs-segment__btn" [class.hs-segment__btn--active]="nuevaSim.tipo === 'unica'" [attr.aria-checked]="nuevaSim.tipo === 'unica'" (click)="nuevaSim.tipo = 'unica'">Una vez</button>
+          <button type="button" role="radio" class="hs-segment__btn" [class.hs-segment__btn--active]="nuevaSim.tipo === 'anual'" [attr.aria-checked]="nuevaSim.tipo === 'anual'" (click)="nuevaSim.tipo = 'anual'">Cada año</button>
+          <button type="button" role="radio" class="hs-segment__btn" [class.hs-segment__btn--active]="nuevaSim.tipo === 'mensual'" [attr.aria-checked]="nuevaSim.tipo === 'mensual'" (click)="nuevaSim.tipo = 'mensual'">Cada mes</button>
+        </div>
+
+        <div class="hs-field" *ngIf="nuevaSim.tipo === 'anual'">
+          <label class="hs-label" for="sim_mes">Mes</label>
+          <select id="sim_mes" class="hs-input" [(ngModel)]="nuevaSim.mes">
+            <option *ngFor="let m of meses; let i = index" [ngValue]="i">{{ m }}</option>
+          </select>
+        </div>
+        <div class="hs-field" *ngIf="nuevaSim.tipo === 'unica'">
+          <label class="hs-label" for="sim_fecha">Mes y año</label>
+          <input id="sim_fecha" type="month" class="hs-input" placeholder="AAAA-MM" [(ngModel)]="nuevaSim.fecha">
+        </div>
+
+        <div class="hs-field" *ngIf="prestamo.hipoAbonoLibre">
+          <label class="hs-label" for="sim_monto">Monto del abono</label>
+          <div class="hs-input-group">
+            <span class="hs-input-group__affix">RD$</span>
+            <input id="sim_monto" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0" [(ngModel)]="nuevaSim.monto">
+          </div>
+          <p class="hs-help">Tu banco acepta abonos de cualquier monto.</p>
+        </div>
+
+        <div class="hs-field" *ngIf="!prestamo.hipoAbonoLibre">
+          <span class="hs-label" id="sim_cuotas_lbl">Cuotas a abonar</span>
+          <div class="stepper" role="group" aria-labelledby="sim_cuotas_lbl">
+            <button type="button" class="stepper__btn" aria-label="Una cuota menos" (click)="cuotasSim(-1)" [disabled]="nuevaSim.cuotas <= 1">−</button>
+            <div class="stepper__valor" aria-live="polite">
+              <div class="stepper__num">{{ nuevaSim.cuotas }}</div>
+              <div class="hs-eyebrow">= {{ nuevaSim.cuotas * cuotaAPagar | currency }}</div>
+            </div>
+            <button type="button" class="stepper__btn" aria-label="Una cuota más" (click)="cuotasSim(1)">+</button>
+          </div>
+          <p class="hs-help">Tu banco acepta abonos en cuotas completas de {{ cuotaAPagar | currency }}.</p>
+        </div>
+
+        <button type="button" class="hs-btn hs-btn--block" (click)="agregarSimulacion()">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i> Agregar abono
+        </button>
+        <p class="hs-help">Calculado con: el abono {{ tipo == 1 ? 'reduce el plazo' : 'reduce la cuota' }}, {{ prestamo.hipoAbonoLibre ? 'de cualquier monto' : 'en cuotas completas' }}. Lo cambias en Resumen.</p>
+      </section>
+
+      <section class="hs-card nuevo-abono" aria-label="Simular cambio de tasa">
+        <h2 class="hs-h3">¿Y si cambia la tasa?</h2>
+        <div class="hs-grid-2">
+          <div class="hs-field">
+            <label class="hs-label" for="sim_tasa">Tasa nueva</label>
+            <div class="hs-input-group">
+              <input id="sim_tasa" type="number" inputmode="decimal" min="0" step="0.01" [placeholder]="real.tasaActual" [(ngModel)]="simTasa.tasa">
+              <span class="hs-input-group__affix">%</span>
+            </div>
+          </div>
+          <div class="hs-field">
+            <label class="hs-label" for="sim_desde">Desde la cuota #</label>
+            <input id="sim_desde" type="number" inputmode="numeric" class="hs-input" [min]="real.cuotaActualMes" [max]="prestamo.hipoPlazo * 12" [placeholder]="cuotaSugeridaSim" [(ngModel)]="simTasa.desdeCuota">
+          </div>
+        </div>
+        <button type="button" class="hs-btn hs-btn--block" (click)="agregarTasaSimulada()">
+          <i class="fa-solid fa-percent" aria-hidden="true"></i> Simular tasa
+        </button>
+        <p class="hs-help">La cuota se recalcula con el saldo de ese momento y las cuotas que te faltan.</p>
+      </section>
+
+      <div class="simular__acciones" *ngIf="sim">
+        <button type="button" class="hs-btn hs-btn--ghost" (click)="verCuotasSimuladas()">Ver cuotas simuladas</button>
+        <button type="button" class="hs-btn hs-btn--danger-link" (click)="limpiarSimulaciones()">Borrar simulación</button>
+      </div>
     </div>
+
+  </ng-container>
 </div>

@@ -21,7 +21,9 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/manifest.webmanifest"
+              "src/manifest.webmanifest",
+              "src/sw.js",
+              "src/web.config"
             ],
             "styles": [
               "src/styles.css"
@@ -38,8 +40,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "10kb",
+                  "maximumError": "16kb"
                 }
               ],
               "fileReplacements": [
@@ -51,6 +53,14 @@
               "outputHashing": "all"
             },
             "development": {
+              "assets": [
+                "src/favicon.ico",
+                "src/assets",
+                "src/manifest.webmanifest",
+                "src/sw.js",
+                "src/web.config",
+                "src/config.json"
+              ],
               "buildOptimizer": false,
               "optimization": false,
               "vendorChunk": true,
@@ -89,7 +99,9 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/manifest.webmanifest"
+              "src/manifest.webmanifest",
+              "src/sw.js",
+              "src/web.config"
             ],
             "styles": [
               "src/styles.css"

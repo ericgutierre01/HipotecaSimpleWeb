@@ -1,114 +1,82 @@
 import { Component, OnInit } from '@angular/core';
 import { Hipoteca } from 'src/app/Entities/Hipoteca';
 import { DataService } from 'src/app/services/services/data.service';
-import { Router } from '@angular/router';
+import { calcularAmortizacion, ResultadoAmortizacion, textoVencimiento, diasHasta } from 'src/app/services/amortizacion';
+import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2'
+
+interface Tarjeta {
+  prestamo: Hipoteca;
+  r: ResultadoAmortizacion;
+}
 
 @Component({
   selector: 'app-inicio',
   templateUrl: './inicio.component.html',
   styleUrls: ['./inicio.component.css'],
-  
 })
-export class InicioComponent implements OnInit{
+export class InicioComponent implements OnInit {
 
   loading = false;
-  hipotecas: Hipoteca[] = [];
-  
+  tarjetas: Tarjeta[] = [];
+  deudaTotal = 0;
+  proximoPago?: { fecha: Date, monto: number, texto: string, vencido: boolean };
 
-  constructor(private _dataservice: DataService,
-    private _router: Router
+  constructor(private _dataservice: DataService) { }
 
-  ) { }
+  noLeidas = 0;
 
   ngOnInit(): void {
-    this.getHipotecas()
+    this.getHipotecas();
+    this._dataservice.getNotificaciones().subscribe(r => this.noLeidas = r.noLeidas, () => { });
   }
 
-
-  crearPrestamo() {
-    this._router.navigateByUrl(`/HipotecaCrear`)
-  }
-
-
+  // La lista no trae los pagos: se pide el detalle de cada préstamo para calcular saldo y progreso
   getHipotecas() {
     this.loading = true;
     this._dataservice.getMisHipotecas().subscribe(
-      (res) => {
-        this.loading = false;
-        this.hipotecas = res;
-
+      (lista: Hipoteca[]) => {
+        if (!lista.length) {
+          this.loading = false;
+          this.tarjetas = [];
+          return;
+        }
+        forkJoin(lista.map(h => this._dataservice.getHipotecaById(h.hipoId))).subscribe(
+          (prestamos: Hipoteca[]) => {
+            this.loading = false;
+            this.tarjetas = prestamos.map(p => ({ prestamo: p, r: calcularAmortizacion(p, p.hipoReduceCuota ? 2 : 1) }));
+            this.calcularResumen();
+          },
+          (err) => this.mostrarError(err)
+        );
       },
-      (err) => {
-        this.loading = false;
-        console.error(err.error);
-        Swal.fire({
-          position: 'center',
-          icon: 'error',
-          title: err.error,
-          showConfirmButton: false,
-          timer: 1500,
-        });
-
-      }
+      (err) => this.mostrarError(err)
     );
   }
 
-  borrarHipoteca(id:any) {
-    try {
-        Swal.fire({
-          title: "Esta seguro que desea borrar esta hipoteca?",
-          showDenyButton: true,
-          showCancelButton: false,
-          confirmButtonText: "si borrar",
-          denyButtonText: `Cancelar`
-        }).then((resultConfirm) => {
-          /* Read more about isConfirmed, isDenied below */
-          if (resultConfirm.isConfirmed) {
-            this.loading = true;
-            this._dataservice.deleteHipoteca(id).subscribe(
-              (res) => {
-                this.loading = false;
-                Swal.fire({
-                  position: 'top-end',
-                  icon: 'success',
-                  title: 'Hipoteca borrada correctamente!',
-                  showConfirmButton: false,
-                  timer: 1500
-                }).then(() => {
-                  window.location.reload();
-                });
-              },
-              (err) => {
-                this.loading = false;
-                console.error(err.error);
-                Swal.fire({
-                  position: 'center',
-                  icon: 'error',
-                  title: err.error,
-                  showConfirmButton: false,
-                  timer: 1500,
-                });
-
-              }
-            );
-          } 
-          else{
-
-          }
-        });
-
-    }
-    catch (error) {
-      this.loading = false;
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error as string,
-        showConfirmButton: true,
-      });
-      console.log(TypeError);
-    }
+  calcularResumen() {
+    this.deudaTotal = this.tarjetas.reduce((t, c) => t + c.r.saldoActual, 0);
+    const proximas = this.tarjetas
+      .filter(c => c.r.proxima)
+      .sort((a, b) => a.r.proxima!.fechaVencimiento.getTime() - b.r.proxima!.fechaVencimiento.getTime());
+    const p = proximas[0];
+    this.proximoPago = p ? {
+      fecha: p.r.proxima!.fechaVencimiento,
+      monto: p.r.cuotaTotalProxima,
+      texto: textoVencimiento(p.r.proxima!.fechaVencimiento),
+      vencido: diasHasta(p.r.proxima!.fechaVencimiento) < 0,
+    } : undefined;
   }
 
+  mostrarError(err: any) {
+    this.loading = false;
+    console.error(err.error);
+    Swal.fire({
+      position: 'center',
+      icon: 'error',
+      title: err.error,
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  }
 }

@@ -1,73 +1,121 @@
-<app-nav></app-nav>
-<div class="bg-gray">
-    <div class="Container">
-        <div class="row mx-3 py-2 PaddingDiv">
+<div class="hs-page">
 
-            <h2>Agregar Hipoteca</h2>
-            <div class="row g-3 overflow-hidden rounded bg-white shadow">
+  <header class="hs-header">
+    <button type="button" class="hs-icon-btn" aria-label="Cancelar y volver" (click)="Cancelar()">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+    <h1 class="hs-title hs-header__text">Nueva hipoteca</h1>
+  </header>
 
-                <div class="d-flex justify-content-center" *ngIf="loading;">
-                    <div class="spinner-border text-primary  m-5" role="status" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
+  <form class="crear" (ngSubmit)="Submit()">
 
-                <div [hidden]="loading" class="row g-3 p-4">
+    <section class="hs-card crear__seccion" aria-label="El préstamo">
+      <div class="hs-field">
+        <label class="hs-label" for="banco_ip">Banco</label>
+        <input id="banco_ip" name="banco" class="hs-input" placeholder="Ej: Banco Popular" [(ngModel)]="form.banco">
+      </div>
 
-                    <div class="col-md-3">
-                        <label for="montoHipo_ip" class="form-label">Monto de la hipoteca *</label>
-                        <input id="montoHipo_ip" placeholder="RD $0" type="text"
-                        mask="separator': {thousandSeparator: ',', suffix: ' sm'}" (blur)="calcularCuotaMensual()" class="form-control">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Interés anual *</label>
-                        <input id="interes_ip" placeholder="0%" type="number" (blur)="calcularCuotaMensual()"
-                         class="form-control">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label for="plazo_ip" class="form-label">Plazo en años *</label>
-                        <input id="plazo_ip" placeholder="0" type="number" class="form-control" (blur)="calcularCuotaMensual()">
-                    </div>
-
-
-                    <div class="col-md-3">
-                        <label for="montoSeguro_ip" class="form-label">Monto de los seguros *</label>
-                        <input id="montoSeguro_ip" placeholder="RD $0" type="text" (blur)="calcularCuotaMensual()"
-                            mask="separator': {thousandSeparator: ',', suffix: ','}" class="form-control">
-                    </div>
-
-                    <hr>
-                    <div class="col-md-3">
-                        <label for="banco_ip" class="form-label">Banco emisor</label>
-                        <input id="banco_ip" placeholder="Ej: Banco popular" type="text" class="form-control">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label for="diaPago_ip" class="form-label">Dia de pagar</label>
-                        <input id="diaPago_ip" placeholder="01" type="text" class="form-control">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Cuota total: </label>
-                        <input id="cuotaTotal_ip" placeholder="RD 0" type="text" disabled class="form-control">
-                    </div>
-
-                    <div class="d-flex flex-column-reverse flex-sm-row-reverse bd-highlight p-0 pt-4 gap-2">
-
-                        <button type="submit" (click)="Submit()"
-                                class="btn btn-primary btn-lg text-white">
-                                Guardar
-                                <i class="fa fa-floppy-o"></i></button>
-
-                        <button class="btn btn-danger btn-lg text-white" (click)="Cancelar()">
-                            <i class="fa fa-times"></i> Cancel</button>
-
-                    </div>
-
-                </div>
-            </div>
+      <div class="hs-field">
+        <label class="hs-label" for="montoHipo_ip">Monto del préstamo</label>
+        <div class="hs-input-group">
+          <span class="hs-input-group__affix">RD$</span>
+          <input id="montoHipo_ip" name="monto" inputmode="decimal" placeholder="0" mask="separator.2" thousandSeparator="," decimalMarker="."
+            class="crear__monto" [(ngModel)]="form.monto">
         </div>
-    </div>
+      </div>
+
+      <div class="hs-grid-2">
+        <div class="hs-field">
+          <label class="hs-label" for="interes_ip">Tasa anual</label>
+          <div class="hs-input-group">
+            <input id="interes_ip" name="tasa" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0" [(ngModel)]="form.tasa">
+            <span class="hs-input-group__affix">%</span>
+          </div>
+        </div>
+        <div class="hs-field">
+          <label class="hs-label" for="diaPago_ip">Día de pago</label>
+          <input id="diaPago_ip" name="dia" type="number" inputmode="numeric" min="1" max="31" placeholder="1–31" class="hs-input" [(ngModel)]="form.dia">
+        </div>
+      </div>
+
+      <fieldset class="crear__plazo">
+        <legend class="hs-label">Plazo en años</legend>
+        <div class="crear__plazos">
+          <button *ngFor="let p of plazos" type="button" class="crear__plazo-btn" [class.crear__plazo-btn--on]="form.plazo == p"
+            [attr.aria-pressed]="form.plazo == p" (click)="form.plazo = p">{{ p }}</button>
+        </div>
+        <label class="hs-help" for="plazo_ip">¿Otro plazo? Escríbelo:</label>
+        <input id="plazo_ip" name="plazo" type="number" inputmode="numeric" min="1" max="40" class="hs-input crear__plazo-otro" [(ngModel)]="form.plazo">
+      </fieldset>
+
+      <div class="hs-field">
+        <label class="hs-label" for="mesesFijos_ip">Tasa fija por</label>
+        <select id="mesesFijos_ip" name="mesesFijos" class="hs-input" [(ngModel)]="form.mesesFijos">
+          <option [ngValue]="null">Todo el plazo</option>
+          <option *ngFor="let a of aniosFijos" [ngValue]="a * 12">{{ a }} {{ a === 1 ? 'año' : 'años' }}, luego variable</option>
+        </select>
+        <p class="hs-help">Si tu tasa cambia después, te avisamos para que registres la nueva.</p>
+      </div>
+
+      <div class="hs-field" *ngIf="form.mesesFijos">
+        <label class="hs-label" for="mesesRevision_ip">Después, el banco la revisa</label>
+        <select id="mesesRevision_ip" name="mesesRevision" class="hs-input" [(ngModel)]="form.mesesRevision">
+          <option [ngValue]="null">Una sola vez</option>
+          <option [ngValue]="6">Cada 6 meses</option>
+          <option [ngValue]="12">Cada año</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="hs-card crear__seccion" aria-label="Seguros">
+      <div class="hs-field">
+        <label class="hs-label" for="montoSeguro_ip">Seguros mensuales</label>
+        <div class="hs-input-group">
+          <span class="hs-input-group__affix">RD$</span>
+          <input id="montoSeguro_ip" name="seguros" inputmode="decimal" placeholder="0" mask="separator.2" thousandSeparator="," decimalMarker="."
+            [(ngModel)]="form.seguros">
+        </div>
+        <p class="hs-help">Seguro de vida, incendio u otros que el banco cobra junto a la cuota.</p>
+      </div>
+
+      <fieldset class="crear__plazo">
+        <legend class="hs-label">¿Cómo te deja abonar tu banco?</legend>
+        <div class="hs-segment hs-segment--light hs-segment--dark" role="radiogroup" aria-label="Tipo de abono">
+          <button type="button" role="radio" class="hs-segment__btn" [class.hs-segment__btn--active]="!form.abonoLibre" [attr.aria-checked]="!form.abonoLibre" (click)="form.abonoLibre = false">Cuotas completas</button>
+          <button type="button" role="radio" class="hs-segment__btn" [class.hs-segment__btn--active]="form.abonoLibre" [attr.aria-checked]="form.abonoLibre" (click)="form.abonoLibre = true">Cualquier monto</button>
+        </div>
+        <p class="hs-help">Algunos bancos solo aceptan abonos de cuotas completas. Lo puedes cambiar después.</p>
+      </fieldset>
+    </section>
+
+    <section class="hs-hero" aria-label="Vista previa" aria-live="polite">
+      <ng-container *ngIf="listo; else falta">
+        <div>
+          <div class="hs-hero__label">Tu cuota mensual</div>
+          <div class="hs-hero__amount">{{ cuota + seguros | currency }}</div>
+          <div class="hs-hero__label">{{ cuota | currency }} de cuota + {{ seguros | currency }} de seguros</div>
+        </div>
+        <div class="hs-grid-2">
+          <div class="hs-hero__tile">
+            <div class="hs-hero__tile-label">Pagarás en total</div>
+            <div class="hs-hero__tile-value crear__tile">{{ totalPagar | currency: 'DOP' : 'symbol' : '1.0-0' }}</div>
+          </div>
+          <div class="hs-hero__tile">
+            <div class="hs-hero__tile-label">En intereses</div>
+            <div class="hs-hero__tile-value crear__tile crear__tile--interes">{{ totalPagar - monto | currency: 'DOP' : 'symbol' : '1.0-0' }}</div>
+          </div>
+        </div>
+        <div class="hs-hero__label">Primera cuota {{ primeraCuota | date: 'd MMM y' }} · última {{ ultimaCuota | date: 'd MMM y' }}</div>
+      </ng-container>
+      <ng-template #falta>
+        <div class="hs-hero__label">Vista previa</div>
+        <div class="crear__falta">Completa monto, tasa y plazo para ver tu cuota.</div>
+      </ng-template>
+    </section>
+
+    <button type="submit" class="hs-btn hs-btn--block" [disabled]="loading">
+      <i class="fa-solid" [class.fa-check]="!loading" [class.fa-circle-notch]="loading" [class.fa-spin]="loading" aria-hidden="true"></i>
+      {{ loading ? 'Guardando…' : 'Guardar hipoteca' }}
+    </button>
+  </form>
 </div>

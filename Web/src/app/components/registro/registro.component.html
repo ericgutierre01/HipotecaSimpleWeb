@@ -1,0 +1,60 @@
+<div class="login">
+  <div class="login__body">
+
+    <ng-container *ngIf="!enviado; else listo">
+      <div class="login__brand">
+        <img class="login__logo" src="assets/logo.svg" alt="Hipoteca Simple" width="104" height="104">
+        <div>
+          <h1 class="login__title">Crear cuenta</h1>
+          <p class="login__lead">Tu solicitud se revisa antes de activar la cuenta. Te avisamos por correo.</p>
+        </div>
+      </div>
+
+      <form class="login__form" (ngSubmit)="enviar()">
+        <div class="hs-field">
+          <label class="hs-label" for="reg_nombre">Nombre</label>
+          <input id="reg_nombre" name="nombre" class="hs-input" autocomplete="name" placeholder="Tu nombre" [(ngModel)]="form.nombre">
+        </div>
+        <div class="hs-field">
+          <label class="hs-label" for="reg_usuario">Usuario</label>
+          <input id="reg_usuario" name="usuario" class="hs-input" autocomplete="username" autocapitalize="none" placeholder="Con este entras a la app" [(ngModel)]="form.usuario">
+        </div>
+        <div class="hs-field">
+          <label class="hs-label" for="reg_email">Correo</label>
+          <input id="reg_email" name="email" type="email" inputmode="email" class="hs-input" autocomplete="email" autocapitalize="none" placeholder="tucorreo@ejemplo.com" [(ngModel)]="form.email">
+        </div>
+        <div class="hs-field">
+          <label class="hs-label" for="reg_pass">Contraseña</label>
+          <div class="hs-input-group login__pass">
+            <input id="reg_pass" name="password" [type]="verClave ? 'text' : 'password'" autocomplete="new-password" placeholder="Mínimo 8 caracteres" [(ngModel)]="form.password">
+            <button type="button" class="login__eye" (click)="verClave = !verClave" [attr.aria-label]="verClave ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <i class="fa-regular" [class.fa-eye]="!verClave" [class.fa-eye-slash]="verClave" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <div class="hs-field">
+          <label class="hs-label" for="reg_confirmar">Repite la contraseña</label>
+          <input id="reg_confirmar" name="confirmar" [type]="verClave ? 'text' : 'password'" class="hs-input" autocomplete="new-password" [(ngModel)]="form.confirmar">
+        </div>
+        <button type="submit" class="hs-btn hs-btn--block login__submit" [disabled]="loading">
+          <i class="fa-solid" [class.fa-paper-plane]="!loading" [class.fa-circle-notch]="loading" [class.fa-spin]="loading" aria-hidden="true"></i>
+          {{ loading ? 'Enviando…' : 'Solicitar acceso' }}
+        </button>
+      </form>
+
+      <div class="login__links">
+        <a routerLink="/Login">Ya tengo cuenta</a>
+      </div>
+    </ng-container>
+
+    <ng-template #listo>
+      <div class="login__exito">
+        <span class="login__exito-icono"><i class="fa-solid fa-envelope-circle-check" aria-hidden="true"></i></span>
+        <h1 class="login__title">Solicitud enviada</h1>
+        <p class="login__lead">Te avisaremos a <strong>{{ form.email }}</strong> cuando tu cuenta sea aprobada.</p>
+        <a routerLink="/Login" class="hs-btn hs-btn--block">Volver al inicio de sesión</a>
+      </div>
+    </ng-template>
+
+  </div>
+</div>

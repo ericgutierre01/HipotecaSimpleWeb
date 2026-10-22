@@ -1,89 +1,198 @@
-.Container {
+.hs-hero {
+  margin-top: 8px;
+}
+
+.campana {
   position: relative;
-  padding-top: 5rem;
 }
 
-.fit-image {
-  height:350px;
-  width: 300px;
+.campana__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  border: 2px solid var(--hs-bg);
+  background: var(--hs-danger);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: content-box;
 }
 
-body {
-
-  margin: auto auto;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+.logo-header {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
 }
 
-.bg-gray{
-  background-color: rgb(243 244 246);
-  margin: -30px;
-  min-height: 100vh;
+.proximo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-size: 18px;
 }
 
-.hipoteca-banco {
+.proximo__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.proximo__monto {
+  font-size: 16px;
   font-weight: 700;
-  color: #1b75bc;
-  margin-bottom: 0.35rem;
 }
 
-.hipoteca-info p {
-  margin-bottom: 0.25rem;
+.lista-titulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }
 
-@media (max-width: 575.98px) {
-  .hipoteca-acciones {
-    width: 100%;
-  }
+.prestamo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--hs-ink);
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-
-.PaddingDiv{
-  padding-left: 100px;
-  padding-right: 100px;
-  padding-top: 50px;
-  padding-bottom: 50px;
+.prestamo:hover {
+  color: var(--hs-ink);
+  border-color: var(--hs-primary);
+  box-shadow: 0 6px 20px rgba(15, 27, 45, 0.08);
 }
 
-.rounded{
-  border-radius: 30px;
+.prestamo__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-
-@media(max-width: 991px) {
-
-  .fit-image {
-    height:350px;
-    width: 300px;
-  }
-
-  .bg-gray{
-    margin: -30px;
+.prestamo__icono {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: var(--hs-primary-tint);
+  color: var(--hs-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
-.PaddingDiv{
-    padding-left: 25px;
-    padding-right: 25px;
-    padding-top:25px;
-    padding-bottom: 25px;
+.prestamo__banco {
+  font-size: 16px;
+  font-weight: 700;
 }
 
+.prestamo__saldo {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-@media(max-width: 445px) {
-  .fit-image {
-    height:350px;
-    width: 300px;
-  }
-
-  .bg-gray{
-    margin: -30px;
+.prestamo__progreso {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.PaddingDiv{
-    padding-left: 25px;
-    padding-right: 25px;
-    padding-top:25px;
-    padding-bottom: 25px;
+.prestamo__progreso-texto {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hs-muted);
 }
 
+.prestamo__progreso-texto strong {
+  color: var(--hs-ink);
+}
+
+.prestamo__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.stat {
+  background: var(--hs-bg);
+  border-radius: 14px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.stat__label {
+  font-size: 11px;
+  color: var(--hs-muted);
+  font-weight: 600;
+}
+
+.stat__value {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat--ok {
+  background: var(--hs-paid-bg);
+}
+
+.stat--ok .stat__label,
+.stat--ok .stat__value {
+  color: var(--hs-paid);
+}
+
+.agregar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 64px;
+  border: 2px dashed #B8C7DA;
+  border-radius: var(--hs-radius);
+  color: var(--hs-primary);
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.agregar:hover {
+  background: var(--hs-primary-tint);
+  color: var(--hs-primary-dark);
+}
+
+.vacio {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 12px 8px;
+}
+
+.vacio p {
+  margin: 0;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+.vacio__icono {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  font-size: 26px;
 }

@@ -1,214 +1,863 @@
-.Container {
-  position: relative;
-  padding-top: 5rem;
-  padding-bottom: 2rem;
+.detalle__titulo {
+  font-size: 19px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-@media (max-width: 575.98px) {
-  .Container {
-    /* La navbar fija es más baja en móvil */
-    padding-top: 4.5rem;
+.detalle__tabs {
+  position: sticky;
+  top: calc(8px + var(--hs-safe-top));
+  z-index: 5;
+  box-shadow: 0 0 0 6px var(--hs-bg);
+}
+
+.detalle__tab-badge {
+  display: inline-flex;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: 4px;
+  border-radius: 999px;
+  background: var(--hs-extra-accent);
+  color: #3B2300;
+  font-size: 12px;
+  font-weight: 800;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Resumen ---------- */
+.resumen {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .resumen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* Etiquetas y valores más legibles en el resumen */
-.form-label {
-  margin-bottom: 0.15rem;
-  font-size: 0.8rem;
-  color: #6b7280;
+.progreso {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-/* Celdas auxiliares (resumen compacto y badge) solo se usan en móvil */
-.amort-table .cuota-resumen,
-.amort-table .badge-actual {
+.progreso__texto {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: #DCE6F2;
+}
+
+.proxima {
+  border: 2px solid var(--hs-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.proxima__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.proxima__label {
+  font-size: 13px;
+  color: var(--hs-primary);
+  font-weight: 700;
+}
+
+.proxima__monto {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.desglose {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.desglose__interes {
+  background: var(--hs-extra-accent);
+}
+
+.desglose__capital {
+  background: var(--hs-primary);
+}
+
+.desglose__seguros {
+  background: #CBD5E1;
+}
+
+.leyenda {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.leyenda li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.leyenda__punto {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.leyenda__nombre {
+  flex: 1;
+  color: var(--hs-ink-2);
+}
+
+.proxima__tip {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--hs-muted);
+  background: var(--hs-bg);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.proxima__tip strong {
+  color: var(--hs-ink);
+}
+
+.saldado {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.saldado p {
+  margin: 0;
+}
+
+.saldado__icono {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: var(--hs-paid-bg);
+  color: var(--hs-paid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.ahorro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ahorro__tile {
+  background: var(--hs-paid-bg);
+  border-radius: 20px;
+  padding: 16px;
+  color: var(--hs-paid);
+  font-size: 20px;
+}
+
+.ahorro__label {
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.ahorro__valor {
+  font-size: 19px;
+  font-weight: 800;
+  color: #08533A;
+}
+
+.link-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--hs-primary);
+  font-weight: 700;
+  font-size: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.tachado {
+  color: var(--hs-muted);
+  text-decoration: line-through;
+  font-weight: 600;
+}
+
+.total-real {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.estrategia,
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.teaser {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  background: var(--hs-extra-bg);
+  border: 1px solid var(--hs-extra-border);
+  border-radius: var(--hs-radius);
+  padding: 18px;
+  text-align: left;
+  color: #6B4A12;
+  cursor: pointer;
+}
+
+.teaser:hover {
+  border-color: var(--hs-extra-accent);
+}
+
+.teaser__icono {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: var(--hs-extra-accent);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.teaser__texto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.teaser__titulo {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--hs-ink);
+}
+
+.teaser__sub {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.datos__grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 12px;
+  font-size: 14px;
+}
+
+.datos__grid dt {
+  font-size: 12px;
+  color: var(--hs-muted);
+  font-weight: 600;
+}
+
+.datos__grid dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.datos .hs-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+/* ---------- Cuotas y Simular: columna centrada ---------- */
+.angosta {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.aviso-sim {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--hs-extra-bg);
+  border: 1px solid var(--hs-extra-border);
+  border-radius: 16px;
+  padding: 10px 10px 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B4A12;
+}
+
+.stats3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.stats3__item {
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.stats3__num {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.stats3__num--ok {
+  color: var(--hs-paid);
+}
+
+.stats3__num--extra {
+  color: var(--hs-extra);
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filtro {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--hs-border-strong);
+  background: var(--hs-surface);
+  color: var(--hs-ink-2);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filtro--on {
+  border-color: var(--hs-navy);
+  background: var(--hs-navy);
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.vacio-filtro {
+  text-align: center;
+  margin: 16px 0;
+}
+
+.grupo {
+  padding: 0;
+  overflow: hidden;
+}
+
+.grupo__cabecera {
+  width: 100%;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  color: var(--hs-ink);
+  cursor: pointer;
+}
+
+.grupo__texto {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.grupo__titulo {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.grupo__sub {
+  font-size: 13px;
+  color: var(--hs-muted);
+  font-weight: 600;
+}
+
+.grupo__extra {
+  color: var(--hs-extra);
+}
+
+/* Línea de tiempo: punto + línea vertical a la izquierda */
+.linea {
+  list-style: none;
+  margin: 0;
+  padding: 0 16px 8px;
+}
+
+.linea__item {
+  position: relative;
+  padding-left: 36px;
+}
+
+.linea__item::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #C9D6E6;
+}
+
+.linea__item--pagada::before {
+  background: #BFE5D3;
+}
+
+.linea__item:first-child::before {
+  top: 24px;
+}
+
+.linea__item:last-child::before {
+  bottom: calc(100% - 24px);
+}
+
+.linea__item:only-child::before {
   display: none;
 }
 
-/* Resaltado de la cuota actual también en la tabla de escritorio */
-.amort-table tr.fila-actual > td {
-  background-color: #eaf3fb;
+.linea__punto {
+  position: absolute;
+  left: 0;
+  top: 13px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 2px solid #B8C7DA;
+  background: var(--hs-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 12px;
+  z-index: 1;
 }
 
-/* ============================================================
-   Tabla de amortización -> tarjetas apiladas en móvil
-   ============================================================ */
-@media (max-width: 767.98px) {
+.linea__item--pagada .linea__punto {
+  border: none;
+  background: var(--hs-paid-strong);
+}
 
-  /* Ocultamos la cabecera: cada celda mostrará su propia etiqueta */
-  .amort-table thead {
-    display: none;
-  }
+.linea__item--actual .linea__punto {
+  top: 22px;
+  border: 6px solid var(--hs-primary);
+}
 
-  .amort-table,
-  .amort-table tbody,
-  .amort-table tr,
-  .amort-table td {
-    display: block;
-    width: 100%;
-  }
+.fila-wrap {
+  border-bottom: 1px solid #EDF1F6;
+}
 
-  .amort-table tr {
-    margin-bottom: 0.9rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    /* Padding generoso: crea el margen (gutter) alrededor del contenido/verde */
-    padding: 0.6rem 1rem;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-  }
+.linea__item:last-child .fila-wrap {
+  border-bottom: none;
+}
 
-  /* Cuota pagada: toda la tarjeta se pinta de verde (sin fondo blanco detrás) */
-  .amort-table tr.table-success {
-    background: #d1e7dd;
-    border-color: #a3cfbb;
-  }
+.fila {
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  color: var(--hs-ink);
+  cursor: pointer;
+}
 
-  /* Anulamos el verde por celda de Bootstrap para que el color sea uniforme */
-  .amort-table tr.table-success td {
-    background: transparent !important;
-    box-shadow: none !important;
-    border-bottom-color: rgba(0, 0, 0, 0.08);
-  }
+.fila__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
 
-  .amort-table td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    text-align: right !important;
-    /* Padding horizontal para que el texto no quede pegado al borde del verde */
-    padding: 0.6rem 0.7rem;
-    border: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  }
+.fila__titulo {
+  font-size: 15px;
+  font-weight: 700;
+}
 
-  .amort-table tr td:last-child {
-    border-bottom: none;
-  }
+.fila__sub {
+  font-size: 12px;
+  color: var(--hs-muted);
+  font-weight: 600;
+}
 
-  /* Etiqueta a la izquierda tomada del atributo data-label */
-  .amort-table td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #6b7280;
-    text-align: left;
-    margin-right: auto;
-  }
+.fila__sub--ok {
+  color: var(--hs-paid);
+  font-weight: 700;
+}
 
-  .amort-table td.amort-actions {
-    justify-content: flex-end;
-    padding-top: 0.6rem;
-  }
+.fila__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
 
-  .amort-table td.amort-actions::before {
-    align-self: center;
-  }
+.fila__saldo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 14px;
+  white-space: nowrap;
+}
 
-  /* ---- Cuota pagada COLAPSADA: solo una línea resumen, tocar para expandir ---- */
-  .amort-table tr.colapsada {
-    cursor: pointer;
-    padding: 0;
-  }
+.fila__saldo span {
+  font-size: 11px;
+  color: var(--hs-muted);
+  font-weight: 600;
+}
 
-  /* Al colapsar, ocultamos todas las celdas de detalle */
-  .amort-table tr.colapsada td:not(.cuota-resumen) {
-    display: none;
-  }
+.fila__detalle {
+  padding: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-  /* La línea resumen se muestra solo cuando la cuota está colapsada */
-  .amort-table tr.colapsada .cuota-resumen {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.4rem 0.75rem;
-    padding: 0.85rem 1rem;
-    border-bottom: none;
-    text-align: left !important;
-  }
+.fila__detalle .hs-btn {
+  align-self: flex-start;
+}
 
-  /* Acento lateral para cuotas pagadas con pago extra/anticipado */
-  .amort-table tr.colapsada .cuota-resumen.con-extra {
-    box-shadow: inset 4px 0 0 0 #f59e0b;
-  }
+.actual {
+  margin: 8px 0;
+  background: var(--hs-primary-tint);
+  border: 2px solid var(--hs-primary);
+  border-radius: 18px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-  /* Etiqueta "Extra" que identifica el pago anticipado */
-  .cuota-resumen .badge-extra {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    background: #f59e0b;
-    color: #fff;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 0.12rem 0.5rem;
-    border-radius: 999px;
-    margin-left: 0.4rem;
-    white-space: nowrap;
-  }
+.actual__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
 
-  .amort-table .cuota-resumen::before {
-    content: none;
-  }
+.actual__label {
+  font-size: 12px;
+  color: var(--hs-primary-dark);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
 
-  .cuota-resumen .resumen-info {
-    font-weight: 600;
-    color: #14532d;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
+.actual__titulo {
+  font-size: 16px;
+  font-weight: 800;
+}
 
-  .cuota-resumen .resumen-monto {
-    font-weight: 600;
-    color: #14532d;
-    white-space: nowrap;
-  }
+.actual__grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  font-size: 13px;
+}
 
-  .cuota-resumen .resumen-monto-label {
-    font-weight: 600;
-    font-size: 0.7rem;
-    color: #6b7280;
-    margin-right: 0.15rem;
-  }
+.actual__grid dt {
+  color: var(--hs-ink-2);
+  font-weight: 600;
+}
 
-  .cuota-resumen .resumen-monto .fa-chevron-down {
-    color: #6b7280;
-    font-size: 0.75rem;
-    margin-left: 0.25rem;
-  }
+.actual__grid dd {
+  margin: 0;
+  font-weight: 700;
+}
 
-  /* ---- Cuota actual: banner + tarjeta resaltada ---- */
-  .amort-table tr.fila-actual {
-    border: 2px solid #1b75bc;
-    box-shadow: 0 4px 14px rgba(27, 117, 188, 0.18);
-  }
+.actual__fuerte {
+  font-size: 15px;
+  font-weight: 800 !important;
+}
 
-  .amort-table tr.fila-actual > td {
-    background-color: transparent;
-  }
+.txt-extra {
+  color: var(--hs-extra);
+}
 
-  .amort-table tr.fila-actual .badge-actual {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
-    background: #1b75bc;
-    color: #fff;
-    font-weight: 700;
-    border-radius: 8px;
-    padding: 0.4rem 0.6rem;
-    margin-bottom: 0.5rem;
-  }
+/* ---------- Simular ---------- */
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--hs-extra-bg);
+  border: 1px solid var(--hs-extra-border);
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #6B4A12;
+  font-weight: 600;
+}
 
-  .amort-table tr.fila-actual .badge-actual .badge-actual-btn {
-    font-weight: 700;
-    white-space: nowrap;
-    color: #1b75bc;
-  }
+.aviso i {
+  color: #B45309;
+}
 
-  .amort-table .badge-actual::before {
-    content: none;
-  }
+.txt-bueno {
+  color: #7EE2B8;
+}
+
+.barras {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.barra__texto {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hs-on-navy-muted);
+  margin-bottom: 4px;
+}
+
+.barra--fuerte .barra__texto {
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.barra--contrato {
+  background: #5D7593 !important;
+}
+
+.barra--sim {
+  background: #FCD34D !important;
+}
+
+.sin-sim p {
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+.comparacion {
+  padding: 6px 18px;
+}
+
+.comparacion__fila {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 8px;
+  padding: 12px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #EDF1F6;
+}
+
+.comparacion__fila:last-child {
+  border-bottom: none;
+}
+
+.comparacion__fila > :first-child {
+  color: var(--hs-ink-2);
+}
+
+.comparacion__fila > :not(:first-child) {
+  text-align: right;
+}
+
+.comparacion__cabecera {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--hs-muted);
+  padding: 10px 0 8px;
+}
+
+.abonos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.abono {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--hs-surface);
+  border: 1px solid var(--hs-extra-border);
+  border-radius: 20px;
+  padding: 12px 8px 12px 14px;
+}
+
+.abono__icono {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #FEF3C7;
+  color: #B45309;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.abono__titulo {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.abono__quitar {
+  border: none;
+  background: transparent;
+  color: var(--hs-muted);
+}
+
+.nuevo-abono {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--hs-bg);
+  border-radius: 16px;
+  padding: 6px;
+}
+
+.stepper__btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: none;
+  background: var(--hs-surface);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--hs-ink);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 27, 45, 0.1);
+}
+
+.stepper__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepper__valor {
+  text-align: center;
+}
+
+.stepper__num {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.simular__acciones {
+  display: flex;
+  gap: 10px;
+}
+
+.simular__acciones .hs-btn {
+  flex: 1;
+  min-height: 50px;
+  font-size: 14px;
+}
+
+.estrategia__sub {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #EDF1F6;
+}
+
+.tasa {
+  display: grid;
+  gap: 14px;
+}
+
+.tasa__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tasa__valor {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--hs-ink);
+}
+
+.tasa__aviso {
+  align-items: flex-start;
+}
+
+.tasas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hs-border);
+}
+
+.tasas__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border-bottom: 1px solid var(--hs-border);
+  font-size: 14px;
+}
+
+.tasas__item span {
+  flex: 1;
+  color: var(--hs-muted);
+}
+
+.tasas__borrar {
+  color: var(--hs-danger);
+}
+
+.tasas__item:first-child {
+  padding-right: 54px;
+}
+
+.txt-malo {
+  color: #FCA5A5;
+}
+
+.fila__total {
+  grid-column: 1 / -1;
+}
+
+.fila__total dd {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--hs-ink);
 }
